@@ -1,16 +1,23 @@
 <PurchaseOrderType> { 
 :shipTo @<USAddress> ;
 :billTo @<USAddress> ;
- ;
+ ? ;
 :items @<Items> ;
 }
-           <USAddress> { 
+<USAddress> { 
 :name xs:string ;
 :street xs:string ;
 :city xs:string ;
 :state xs:string ;
 :zip xs:decimal ;
 }
-    <Items> { 
-:item ;
+<Items> { 
+:item @<item> * ;
+}
+<item> { 
+:productName xs:string ;
+:quantityfail ;
+:USPrice xs:decimal ;
+ ? ;
+:shipDate xs:date ? ;
 }
