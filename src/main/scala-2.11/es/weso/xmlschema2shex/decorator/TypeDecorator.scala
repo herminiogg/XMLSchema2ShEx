@@ -81,6 +81,7 @@ class TypeDecorator(schema: Schema) {
       }
     }
   }
+  
 
   private def decorateXSDType(typeName: Option[String]): Option[Type] = {
     typeName match {

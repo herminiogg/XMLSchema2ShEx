@@ -51,7 +51,6 @@ class CodeGenerator(schema: Schema) {
       case None => element.ref match {
         case Some(ref) => ":" + ref
         case None => None
-
       }
     }
     val typeString = element.aType match {

@@ -1,0 +1,23 @@
+<PurchaseOrderType> { 
+:shipTo @<USAddress> ;
+:billTo @<USAddress> ;
+:comment xs:string ? ;
+:items @<Items> ;
+}
+<USAddress> { 
+:name xs:string ;
+:street xs:string ;
+:city xs:string ;
+:state xs:string ;
+:zip xs:decimal ;
+}
+<Items> { 
+:item @<item> * ;
+}
+<item> { 
+:productName xs:string ;
+:quantity xs:positiveInteger {1, 99} ;
+:USPrice xs:decimal ;
+:comment xs:string ? ;
+:shipDate xs:date ? ;
+}

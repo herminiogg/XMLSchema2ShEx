@@ -5,5 +5,5 @@ package es.weso.xmlschema2shex.ast
   */
 case class Restriction(attributes: Attributes, restrictions: Option[List[RestrictionModifier]],
                        sequence: Option[Sequence], attributesElements: Option[List[AttributeElement]]) {
-
+  val base = attributes.attributes.get("base")
 }
