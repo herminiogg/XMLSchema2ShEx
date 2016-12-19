@@ -39,7 +39,7 @@ class XMLSchemaParser extends JavaTokenParsers {
 
   def attributesList: Parser[List[AttributeElement]] = rep("<xs:attribute"~attributes~"/>") ^^ {
     _.map {
-      case _ ~ attributes ~ _ => AttributeElement(attributes)
+      case _ ~ attributes ~ _ => AttributeElement(attributes, None)
     }
   }
 
@@ -47,7 +47,7 @@ class XMLSchemaParser extends JavaTokenParsers {
     case _ ~ attributes ~ _ ~ restriction ~ _ => SimpleType(attributes, restriction)
   }
 
-  def attributes: Parser[Attributes] = rep("[A-Za-z:]*=\"[A-Za-z0-9:/.#{}\\-\\[\\]\\\\]*\"".r) ^^ { a => {
+  def attributes: Parser[Attributes] = rep("[A-Za-z:]*=(\"|')[A-Za-z0-9:/.#{}\\-\\[\\]\\\\]*(\"|')".r) ^^ { a => {
     Attributes(a.map(_.split("=").toList match {
       case x :: xs => (x.toString, xs.head.toString)
     }).toMap)
@@ -89,5 +89,6 @@ class XMLSchemaParser extends JavaTokenParsers {
   }
 
   def annotation: Parser[Any] = "<xs:annotation>"~"".r~"</xs:annotation>"
+
 
 }

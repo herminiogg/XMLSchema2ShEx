@@ -27,29 +27,35 @@ class TypeDecorator(schema: Schema) {
 
   private def decorateComplexType(complexType: ComplexType): ComplexType = {
     val newElementSequence = complexType.sequence.elements.map(decorateAllElements)
+    val newAttributesSequence = complexType.attributesElements.map(decorateAllAttributes)
     val newSequence = complexType.sequence.copy(elements = newElementSequence)
-    complexType.copy(sequence = newSequence)
+    complexType.copy(sequence = newSequence, attributesElements = newAttributesSequence)
   }
 
   private def decorateAllElements(element: Element): Element = {
     val newElement = element.copy(aType = searchTypeForElement(element, schema.tags))
     val newType = newElement.aType.map({
       case c: ComplexType =>
-        val innerElements = for(elem <- c.sequence.elements) yield decorateAllElements(elem)
+        val innerElements = for (elem <- c.sequence.elements) yield decorateAllElements(elem)
+        val newAttributesSequence = c.attributesElements.map(decorateAllAttributes)
         val newSequence = c.sequence.copy(elements = innerElements)
-        c.copy(sequence = newSequence)
+        c.copy(sequence = newSequence, attributesElements = newAttributesSequence)
       case s: SimpleType => s
       case x: XSDType => x
     })
     newElement.copy(aType = newType)
   }
 
-  private def searchTypeForElement(element: Element, tags: List[Tag]): Option[Type] = {
+  private def decorateAllAttributes(attribute: AttributeElement): AttributeElement = {
+    attribute.copy(aType = searchTypeForElement(attribute, schema.tags))
+  }
+
+  private def searchTypeForElement(element: Typeable, tags: List[Tag]): Option[Type] = {
     element.aType match {
       case Some(theType) => Some(theType)
       case None =>
         val typeName = getType(element)
-        if(decorateXSDType(typeName).isDefined) return decorateXSDType(typeName)
+        if(decorateXSDType(typeName, element.attributes).isDefined) return decorateXSDType(typeName, element.attributes)
         tags.foldLeft[Option[Type]](None)((result, tag) => {
           if(result.isDefined)
             result
@@ -62,7 +68,10 @@ class TypeDecorator(schema: Schema) {
               case e: Element => {
                 if (e.name.equals(typeName)) e.aType match {
                   case Some(theType) => Some(theType)
-                  case None => searchTypeForElement(e, tags)
+                  case None => {
+                    val findedType = searchTypeForElement(e, tags)
+                    findedType
+                  }
                 } else result
               }
               case _ => result
@@ -72,7 +81,7 @@ class TypeDecorator(schema: Schema) {
     }
   }
 
-  private def getType(element: Element): Option[String] = {
+  private def getType(element: Typeable): Option[String] = {
     element.attributes.attributes.get("type") match {
       case Some(theType) => Some(theType)
       case None => element.attributes.attributes.get("ref") match {
@@ -83,13 +92,14 @@ class TypeDecorator(schema: Schema) {
   }
   
 
-  private def decorateXSDType(typeName: Option[String]): Option[Type] = {
+  private def decorateXSDType(typeName: Option[String], attributes: Attributes): Option[Type] = {
     typeName match {
       case Some(s) => s.replaceAll("\"", "") match {
         case "xs:string" => Some(XSDString())
         case "xs:integer" => Some(XSDInteger())
         case "xs:decimal" => Some(XSDDecimal())
         case "xs:date" => Some(XSDDate())
+        case "xs:NMTOKEN" => Some(XSNMToken(value = attributes.attributes.getOrElse("fixed", "")))
         case _ => None
       }
       case _ => None

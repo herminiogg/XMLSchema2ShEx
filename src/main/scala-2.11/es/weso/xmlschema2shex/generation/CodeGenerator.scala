@@ -27,7 +27,7 @@ class CodeGenerator(schema: Schema) {
     }
     val shape =
       if(!alreadyGeneratedShape.contains(complexType))
-        "<" + name + "> { \n" + generateSequence(complexType.sequence) + "\n}\n"
+        "<" + name + "> { \n" + generateSequence(complexType.sequence, complexType.attributesElements) + "\n}\n"
       else ""
     alreadyGeneratedShape += complexType
     val nestedShapes = for(element <- complexType.sequence.elements) yield element.aType match {
@@ -40,12 +40,17 @@ class CodeGenerator(schema: Schema) {
     shape + nestedShapes.mkString("")
   }
 
-  def generateSequence(sequence: Sequence): String = {
-    (for(element <- sequence.elements)
+  def generateSequence(sequence: Sequence, attributes: List[AttributeElement]): String = {
+    val elementsString =
+      (for(element <- sequence.elements)
       yield generateElement(element)).mkString("\n")
+    val attributesString =
+      (for(attribute <- attributes)
+      yield generateElement(attribute)).mkString("\n")
+    elementsString + "\n" + attributesString
   }
 
-  def generateElement(element: Element): String = {
+  def generateElement(element: Typeable): String = {
     val elementStart = element.name match {
       case Some(theName) => ":" + theName
       case None => element.ref match {
@@ -57,18 +62,25 @@ class CodeGenerator(schema: Schema) {
       case Some(theType) => theType match {
         case c: ComplexType => " @<" + c.name.get + ">"
         case s: SimpleType => if(s.name.isDefined) " " + s.name.get else "fail"
-        case x: XSDType => " " + x.name
+        case x: XSDType => x match {
+          case p: XSNMToken => " [\"" + p.value + "\"] "
+          case _ => " " + x.name
+        }
       }
       case None => ""
     }
-    val restrictions = generateRestrictions(element).map(r =>
-      if(r.equals("{1}")) "" else " " + r) //implicit boundary
+    val restrictions = element match {
+      case t: Typeable => generateRestrictions(t).map(r =>
+                if(r.equals("{1}")) "" else " " + r) //implicit boundary
+
+      case _ => Some("")
+    }
     elementStart + typeString + restrictions.get + " ;"
   }
 
-  def generateRestrictions(element: Element): Option[String] = {
+  def generateRestrictions(element: Typeable): Option[String] = {
     val minValue = if(element.minOccurs.isEmpty) Some("1") else element.minOccurs
-    minValue.map(min => {
+    val boundaries = minValue.map(min => {
       val maxValue = if(element.maxOccurs.isEmpty) Some("1") else element.maxOccurs
       maxValue.map(max => {
         if(min.toInt == 0 && max.equals("unbounded")) "*"
@@ -77,7 +89,9 @@ class CodeGenerator(schema: Schema) {
         else if(min.toInt == max.toInt) "{" + min.toInt + "}"
         else "{" + min.toInt + ", " + max.toInt + "}"
       }).get
-    })
+    }).getOrElse("")
+    val pattern = element.pattern.map("PATTERN " + _).getOrElse("")
+    Some(List(boundaries, pattern).mkString(" "))
   }
 
 }

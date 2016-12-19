@@ -12,5 +12,7 @@ case class MaxExclusive(attributes: Attributes) extends BoundaryRestrictionModif
 case class MinExclusive(attributes: Attributes) extends BoundaryRestrictionModifier
 case class MaxInclusive(attributes: Attributes) extends BoundaryRestrictionModifier
 case class MinInclusive(attributes: Attributes) extends BoundaryRestrictionModifier
-case class Pattern(attributes: Attributes) extends RestrictionModifier
+case class Pattern(attributes: Attributes) extends RestrictionModifier {
+  def value = attributes.attributes.get("value").map(_.replace("\\", "\\\\"))
+}
 case class Enumeration(attributes: Attributes) extends RestrictionModifier
