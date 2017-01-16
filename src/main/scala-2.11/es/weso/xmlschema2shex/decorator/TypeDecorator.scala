@@ -8,6 +8,10 @@ import es.weso.xmlschema2shex.ast._
 class TypeDecorator(schema: Schema) {
 
   def decorate(): Schema = {
+    doDecorate()
+  }
+
+  private def doDecorate(): Schema = {
     schema.tags.foldLeft(schema)((oldSchema, tag) => {
       tag match {
         case e: Element =>
@@ -68,9 +72,12 @@ class TypeDecorator(schema: Schema) {
               case e: Element => {
                 if (e.name.equals(typeName)) e.aType match {
                   case Some(theType) => Some(theType)
-                  case None => {
-                    val findedType = searchTypeForElement(e, tags)
-                    findedType
+                  case _ => result
+                } else if (element.ref.isDefined) {
+                  val algo = searchRefType(typeName, schema.tags)
+                  searchRefType(typeName, schema.tags) match {
+                    case Some(ref) => Some(ref)
+                    case None => result
                   }
                 } else result
               }
@@ -79,6 +86,32 @@ class TypeDecorator(schema: Schema) {
           }
         })
     }
+  }
+
+  private def searchRefType(ref: Option[String], tags: List[Tag]): Option[Type] = {
+    tags.foldLeft[Option[Type]](None)((result, tag) => {
+      if(result.isDefined)
+        result
+      else {
+        tag match {
+          case c: ComplexType =>
+            if(c.name.equals(ref)) Some(c) else searchRefType(ref, c.sequence.elements)
+          case s: SimpleType =>
+            if(s.name.equals(ref)) Some(s) else result
+          case e: Element =>
+            if(e.name.equals(ref)) {
+              if(e.aType.isDefined) {
+                e.aType
+              }
+              else {
+                var algo = decorateXSDType(e.theType, e.attributes)
+                decorateXSDType(e.theType, e.attributes)
+              }
+            } else result
+          case _ => result
+        }
+      }
+    })
   }
 
   private def getType(element: Typeable): Option[String] = {
@@ -90,11 +123,10 @@ class TypeDecorator(schema: Schema) {
       }
     }
   }
-  
 
   private def decorateXSDType(typeName: Option[String], attributes: Attributes): Option[Type] = {
     typeName match {
-      case Some(s) => s.replaceAll("\"", "") match {
+      case Some(s) => s.replaceAll("\"|'", "") match {
         case "xs:string" => Some(XSDString())
         case "xs:integer" => Some(XSDInteger())
         case "xs:decimal" => Some(XSDDecimal())

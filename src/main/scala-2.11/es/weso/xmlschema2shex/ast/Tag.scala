@@ -3,7 +3,7 @@ package es.weso.xmlschema2shex.ast
 /**
   * Created by herminio on 4/10/16.
   */
-sealed trait Tag
+sealed trait Tag {}
 sealed trait Type extends Tag
 sealed trait Typeable {
   val aType: Option[Type]
@@ -54,7 +54,7 @@ sealed trait Typeable {
 case class Element(attributes: Attributes, aType: Option[Type]) extends Tag with Typeable {
   val name = attributes.attributes.get("name")
   val ref = attributes.attributes.get("ref")
-  val theType = attributes.attributes.get("theType")
+  val theType = attributes.attributes.get("type")
 
 }
 

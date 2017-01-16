@@ -8,36 +8,52 @@ import es.weso.xmlschema2shex.ast._
 class CodeGenerator(schema: Schema) {
 
   val alreadyGeneratedShape = scala.collection.mutable.ListBuffer.empty[ComplexType]
+  val generatedShapes = scala.collection.mutable.HashMap.empty[ComplexType, String]
 
   def generate(): String = {
-    generateTypes().mkString("").replaceAll("\"", "")
+    generateTypes().mkString("").replaceAll("\"|'", "")
   }
 
   def generateTypes(): List[String] = {
     for(tag <- schema.tags) yield tag match {
-      case c: ComplexType => generateComplexType(c)
+      case c: ComplexType => generateComplexType(c, c.name)
+      case e: Element => e.aType.map {
+        case c: ComplexType => generateComplexType(c, e.name)
+        case _ => ""
+      }.getOrElse("")
       case _ => ""
     }
+    generatedShapes.values.toList.reverse
   }
 
-  def generateComplexType(complexType: ComplexType): String = {
+  def generateComplexType(complexType: ComplexType, elementName: Option[String]): Unit = {
     val name = complexType.name match {
       case Some(aName) => aName
-      case None =>  "dummy"
+      case None => elementName match {
+        case Some(eName) => eName
+        case None => throw new Exception("No name to generate the shape")
+      }
     }
-    val shape =
-      if(!alreadyGeneratedShape.contains(complexType))
-        "<" + name + "> { \n" + generateSequence(complexType.sequence, complexType.attributesElements) + "\n}\n"
-      else ""
-    alreadyGeneratedShape += complexType
-    val nestedShapes = for(element <- complexType.sequence.elements) yield element.aType match {
+    val shape = "<" + name + "> { \n" + generateSequence(complexType.sequence, complexType.attributesElements) + "\n}\n"
+
+
+    for(element <- complexType.sequence.elements) yield element.aType match {
       case Some(nestedType) => nestedType match {
-        case c: ComplexType => generateComplexType(c)
+        case c: ComplexType => generateComplexType(c, Some(name))
         case _ => "" // to implement
       }
       case _ => ""
     }
-    shape + nestedShapes.mkString("")
+
+    if(!alreadyGeneratedShape.contains(complexType)) {
+      alreadyGeneratedShape += complexType
+      generatedShapes += (complexType -> shape)
+    } else {
+      alreadyGeneratedShape -= complexType
+      generatedShapes -= complexType
+      alreadyGeneratedShape += complexType
+      generatedShapes += (complexType -> shape)
+    }
   }
 
   def generateSequence(sequence: Sequence, attributes: List[AttributeElement]): String = {
@@ -60,7 +76,7 @@ class CodeGenerator(schema: Schema) {
     }
     val typeString = element.aType match {
       case Some(theType) => theType match {
-        case c: ComplexType => " @<" + c.name.get + ">"
+        case c: ComplexType => " @<" + c.name.getOrElse(c.ref.getOrElse(element.name.getOrElse(element.ref.get))) + ">"
         case s: SimpleType => if(s.name.isDefined) " " + s.name.get else "fail"
         case x: XSDType => x match {
           case p: XSNMToken => " [\"" + p.value + "\"] "
@@ -79,9 +95,9 @@ class CodeGenerator(schema: Schema) {
   }
 
   def generateRestrictions(element: Typeable): Option[String] = {
-    val minValue = if(element.minOccurs.isEmpty) Some("1") else element.minOccurs
+    val minValue = if(element.minOccurs.isEmpty) Some("1") else element.minOccurs.map(_.replace("'", ""))
     val boundaries = minValue.map(min => {
-      val maxValue = if(element.maxOccurs.isEmpty) Some("1") else element.maxOccurs
+      val maxValue = if(element.maxOccurs.isEmpty) Some("1") else element.maxOccurs.map(_.replace("'", ""))
       maxValue.map(max => {
         if(min.toInt == 0 && max.equals("unbounded")) "*"
         else if(min.toInt == 1 && max.equals("unbounded")) "+"
