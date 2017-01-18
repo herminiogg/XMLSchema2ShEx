@@ -10,10 +10,15 @@ import es.weso.xmlschema2shex.generation.CodeGenerator
 case class XMLSchema2ShexParser() extends XMLSchemaParser {
 
   def parse(xmlSchema: String, context: Option[String]): String = {
-    val schema = parseAll(root, xmlSchema).get
+    val xmlSchemaWithoutComments = removeComments(xmlSchema)
+    val schema = parseAll(root, xmlSchemaWithoutComments).get
     new SemanticChecker(schema).check()
     val decoratedSchema = new TypeDecorator(new NameDecorator(schema).decorate()).decorate()
     new CodeGenerator(decoratedSchema).generate()
+  }
+
+  private def removeComments(xmlSchema: String): String = {
+    xmlSchema.replaceAll("<!-- .* -->", "")
   }
 
 }

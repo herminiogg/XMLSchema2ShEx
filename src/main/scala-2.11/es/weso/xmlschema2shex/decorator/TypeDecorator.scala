@@ -69,12 +69,11 @@ class TypeDecorator(schema: Schema) {
                 if(c.name.equals(typeName)) Some(c) else searchTypeForElement(element, c.sequence.elements)
               case s: SimpleType =>
                 if(s.name.equals(typeName)) Some(s) else result
-              case e: Element => {
+              case e: Typeable => {
                 if (e.name.equals(typeName)) e.aType match {
                   case Some(theType) => Some(theType)
                   case _ => result
                 } else if (element.ref.isDefined) {
-                  val algo = searchRefType(typeName, schema.tags)
                   searchRefType(typeName, schema.tags) match {
                     case Some(ref) => Some(ref)
                     case None => result
@@ -98,15 +97,10 @@ class TypeDecorator(schema: Schema) {
             if(c.name.equals(ref)) Some(c) else searchRefType(ref, c.sequence.elements)
           case s: SimpleType =>
             if(s.name.equals(ref)) Some(s) else result
-          case e: Element =>
+          case e: Typeable =>
             if(e.name.equals(ref)) {
-              if(e.aType.isDefined) {
-                e.aType
-              }
-              else {
-                var algo = decorateXSDType(e.theType, e.attributes)
-                decorateXSDType(e.theType, e.attributes)
-              }
+              if(e.aType.isDefined) e.aType
+              else decorateXSDType(e.theType, e.attributes)
             } else result
           case _ => result
         }
@@ -129,6 +123,7 @@ class TypeDecorator(schema: Schema) {
       case Some(s) => s.replaceAll("\"|'", "") match {
         case "xs:string" => Some(XSDString())
         case "xs:integer" => Some(XSDInteger())
+        case "xs:positiveInteger" => Some(XSDPositiveInteger())
         case "xs:decimal" => Some(XSDDecimal())
         case "xs:date" => Some(XSDDate())
         case "xs:NMTOKEN" => Some(XSNMToken(value = attributes.attributes.getOrElse("fixed", "")))

@@ -19,17 +19,20 @@ class SemanticChecker(val schema: Schema) {
   def checkTags(tags: List[Tag]) = {
     for(tag <- tags) {
       tag match {
-        case Element(attributes, aType) => {
-          aType match {
-            case Some(theType) => checkType(theType)
-            case None =>
-              if (!attributes.attributes.isDefinedAt("type") && !attributes.attributes.isDefinedAt("ref"))
-                throw new Exception(SemanticErrors.NOTYPEDEFINED + attributes.attributes.get("name"))
-          }
-        }
+        case e: Element => checkElement(e)
+        case a: AttributeElement => checkElement(a)
         case c: ComplexType => checkType(c)
         case s: SimpleType => checkType(s)
       }
+    }
+  }
+
+  def checkElement(t: Typeable) = {
+    t.aType match {
+      case Some(theType) => checkType(theType)
+      case None =>
+        if (!t.attributes.attributes.isDefinedAt("type") && !t.attributes.attributes.isDefinedAt("ref"))
+          throw new Exception(SemanticErrors.NOTYPEDEFINED + t.attributes.attributes.get("name"))
     }
   }
 

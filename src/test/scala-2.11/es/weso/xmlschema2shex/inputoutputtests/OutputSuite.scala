@@ -96,7 +96,7 @@ class OutputSuite extends FunSuite with Matchers {
                              |:USPrice xs:decimal {1}  ;
                              |:comment xs:string ?  ;
                              |:shipDate xs:date ?  ;
-                             |:partNum SKU {1} PATTERN \\d{3}-[A-Z]{2} ;
+                             |:partNum xs:string {1} PATTERN \\d{3}-[A-Z]{2} ;
                              |}""".stripMargin.replaceAll(" |\n", ""))
   }
 
@@ -136,5 +136,152 @@ class OutputSuite extends FunSuite with Matchers {
                             |}""".stripMargin.replaceAll(" |\n", ""))
 
   }
+
+  test("""Xml1 version""") {
+    val xml = """<?xml version="1.0" encoding="UTF-8" ?>
+                 |<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                 |
+                 |<xs:element name="orderperson" type="xs:string"/>
+                 |<xs:element name="name" type="xs:string"/>
+                 |<xs:element name="address" type="xs:string"/>
+                 |<xs:element name="city" type="xs:string"/>
+                 |<xs:element name="country" type="xs:string"/>
+                 |<xs:element name="title" type="xs:string"/>
+                 |<xs:element name="note" type="xs:string"/>
+                 |<xs:element name="quantity" type="xs:positiveInteger"/>
+                 |<xs:element name="price" type="xs:decimal"/>
+                 |
+                 |<!-- definition of attributes -->
+                 |<xs:attribute name="orderid" type="xs:string"/>
+                 |
+                 |<!-- definition of complex elements -->
+                 |<xs:element name="shipto">
+                 |  <xs:complexType>
+                 |    <xs:sequence>
+                 |      <xs:element ref="name"/>
+                 |      <xs:element ref="address"/>
+                 |      <xs:element ref="city"/>
+                 |      <xs:element ref="country"/>
+                 |    </xs:sequence>
+                 |  </xs:complexType>
+                 |</xs:element>
+                 |
+                 |<xs:element name="item">
+                 |  <xs:complexType>
+                 |    <xs:sequence>
+                 |      <xs:element ref="title"/>
+                 |      <xs:element ref="note" minOccurs="0"/>
+                 |      <xs:element ref="quantity"/>
+                 |      <xs:element ref="price"/>
+                 |    </xs:sequence>
+                 |  </xs:complexType>
+                 |</xs:element>
+                 |
+                 |<xs:element name="shiporder">
+                 |  <xs:complexType>
+                 |    <xs:sequence>
+                 |      <xs:element ref="orderperson"/>
+                 |      <xs:element ref="shipto"/>
+                 |      <xs:element ref="item" maxOccurs="unbounded"/>
+                 |    </xs:sequence>
+                 |    <xs:attribute ref="orderid" use="required"/>
+                 |  </xs:complexType>
+                 |</xs:element>
+                 |
+                 |</xs:schema>""".stripMargin
+    val output = XMLSchema2ShexParser().parse(xml, None).stripMargin.replaceAll(" |\n", "")
+    output should include("""<shiporder> {
+                            |:orderperson xs:string {1}  ;
+                            |:shipto @<shipto> {1}  ;
+                            |:item @<item> +  ;
+                            |:orderid xs:string {1}  ;
+                            |}""".stripMargin.replaceAll(" |\n", ""))
+    output should include("""<item> {
+                            |:title xs:string {1}  ;
+                            |:note xs:string ?  ;
+                            |:quantity xs:positiveInteger {1}  ;
+                            |:price xs:decimal {1}  ;
+                            |}""".stripMargin.replaceAll(" |\n", ""))
+    output should include("""<shipto> {
+                           |:name xs:string {1}  ;
+                           |:address xs:string {1}  ;
+                           |:city xs:string {1}  ;
+                           |:country xs:string {1}  ;
+                           |}""".stripMargin.replaceAll(" |\n", ""))
+  }
+
+  test("""Xml2 version""") {
+    val xml = """<?xml version="1.0" encoding="UTF-8" ?>
+                 |<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                 |
+                 |<xs:simpleType name="stringtype">
+                 |  <xs:restriction base="xs:string"/>
+                 |</xs:simpleType>
+                 |
+                 |<xs:simpleType name="inttype">
+                 |  <xs:restriction base="xs:positiveInteger"/>
+                 |</xs:simpleType>
+                 |
+                 |<xs:simpleType name="dectype">
+                 |  <xs:restriction base="xs:decimal"/>
+                 |</xs:simpleType>
+                 |
+                 |<xs:simpleType name="orderidtype">
+                 |  <xs:restriction base="xs:string">
+                 |    <xs:pattern value="[0-9]{6}"/>
+                 |  </xs:restriction>
+                 |</xs:simpleType>
+                 |
+                 |<xs:complexType name="shiptotype">
+                 |  <xs:sequence>
+                 |    <xs:element name="name" type="stringtype"/>
+                 |    <xs:element name="address" type="stringtype"/>
+                 |    <xs:element name="city" type="stringtype"/>
+                 |    <xs:element name="country" type="stringtype"/>
+                 |  </xs:sequence>
+                 |</xs:complexType>
+                 |
+                 |<xs:complexType name="itemtype">
+                 |  <xs:sequence>
+                 |    <xs:element name="title" type="stringtype"/>
+                 |    <xs:element name="note" type="stringtype" minOccurs="0"/>
+                 |    <xs:element name="quantity" type="inttype"/>
+                 |    <xs:element name="price" type="dectype"/>
+                 |  </xs:sequence>
+                 |</xs:complexType>
+                 |
+                 |<xs:complexType name="shipordertype">
+                 |  <xs:sequence>
+                 |    <xs:element name="orderperson" type="stringtype"/>
+                 |    <xs:element name="shipto" type="shiptotype"/>
+                 |    <xs:element name="item" maxOccurs="unbounded" type="itemtype"/>
+                 |  </xs:sequence>
+                 |  <xs:attribute name="orderid" type="orderidtype" use="required"/>
+                 |</xs:complexType>
+                 |
+                 |<xs:element name="shiporder" type="shipordertype"/>
+                 |
+                 |</xs:schema>""".stripMargin
+    val output = XMLSchema2ShexParser().parse(xml, None).stripMargin.replaceAll(" |\n", "")
+    output should include("""<shipordertype> {
+                            |:orderperson xs:string {1}  ;
+                            |:shipto @<shiptotype> {1}  ;
+                            |:item @<itemtype> +  ;
+                            |:orderid xs:string {1} PATTERN [0-9]{6} ;
+                            |}""".stripMargin.replaceAll(" |\n", ""))
+    output should include("""<itemtype> {
+                            |:title xs:string {1}  ;
+                            |:note xs:string ?  ;
+                            |:quantity xs:positiveInteger {1}  ;
+                            |:price xs:decimal {1}  ;
+                            |}""".stripMargin.replaceAll(" |\n", ""))
+    output should include("""<shiptotype> {
+                            |:name xs:string {1}  ;
+                            |:address xs:string {1}  ;
+                            |:city xs:string {1}  ;
+                            |:country xs:string {1}  ;
+                            |}""".stripMargin.replaceAll(" |\n", ""))
+  }
+
 
 }

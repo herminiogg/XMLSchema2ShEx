@@ -9,11 +9,11 @@ import scala.util.parsing.combinator._
 
 class XMLSchemaParser extends JavaTokenParsers {
 
-  def root: Parser[Schema] = "<xs:schema"~attributes~">"~rep(tags)~"</xs:schema>" ^^ {
-    case _ ~ attributes ~ _ ~ tags ~ _ => Schema(attributes, tags)
+  def root: Parser[Schema] = opt("<?xml"~attributes~"?>")~"<xs:schema"~attributes~">"~rep(tags)~"</xs:schema>" ^^ {
+    case _ ~ _ ~ attributes ~ _ ~ tags ~ _ => Schema(attributes, tags)
   }
 
-  def tags: Parser[Tag] = element | complexType | simpleType
+  def tags: Parser[Tag] = element | complexType | simpleType | attribute
 
   def element: Parser[Element] =
     "<xs:element"~attributes~">"~opt(simpleType)~"</xs:element>" ^^ {
@@ -23,6 +23,15 @@ class XMLSchemaParser extends JavaTokenParsers {
     } |"<xs:element"~attributes~"/>" ^^ {
       case _ ~ attributes ~ _ => Element(attributes, None)
     }
+
+  def attribute: Parser[AttributeElement] =
+    "<xs:attribute"~attributes~">"~opt(simpleType)~"</xs:attribute>" ^^ {
+    case _ ~ attributes ~ _ ~ option ~ _ => AttributeElement(attributes, option)
+  } | "<xs:attribute"~attributes~">"~opt(complexType)~"</xs:attribute>" ^^ {
+    case _ ~ attributes ~ _ ~ option ~ _ => AttributeElement(attributes, option)
+  } |"<xs:attribute"~attributes~"/>" ^^ {
+    case _ ~ attributes ~ _ => AttributeElement(attributes, None)
+  }
 
   def complexType: Parser[ComplexType] = "<xs:complexType"~attributes~">"~sequence~opt(attributesList)~"</xs:complexType>" ^^ {
     case _ ~ attributes ~ _ ~ sequence ~ attributesList ~_ =>
@@ -59,6 +68,8 @@ class XMLSchemaParser extends JavaTokenParsers {
   } |
     "<xs:restriction"~attributes~">"~sequence~opt(attributesList) ~"</xs:restriction>" ^^ {
       case _ ~ attributes ~_ ~ sequence ~ attributeList ~ _ => Restriction(attributes, None, Some(sequence), attributeList)
+  } | "<xs:restriction"~attributes~"/>" ^^{
+    case _ ~ attributes ~ _ => Restriction(attributes, None, None, None)
   }
 
   def restrictions: Parser[RestrictionModifier] = maxExclusiveRestriction | minExclusiveRestriction |

@@ -36,10 +36,9 @@ class CodeGenerator(schema: Schema) {
     }
     val shape = "<" + name + "> { \n" + generateSequence(complexType.sequence, complexType.attributesElements) + "\n}\n"
 
-
     for(element <- complexType.sequence.elements) yield element.aType match {
       case Some(nestedType) => nestedType match {
-        case c: ComplexType => generateComplexType(c, Some(name))
+        case c: ComplexType if !alreadyGeneratedShape.contains(c) => generateComplexType(c, Some(name))
         case _ => "" // to implement
       }
       case _ => ""
@@ -77,7 +76,15 @@ class CodeGenerator(schema: Schema) {
     val typeString = element.aType match {
       case Some(theType) => theType match {
         case c: ComplexType => " @<" + c.name.getOrElse(c.ref.getOrElse(element.name.getOrElse(element.ref.get))) + ">"
-        case s: SimpleType => if(s.name.isDefined) " " + s.name.get else "fail"
+        case s: SimpleType => {
+          s.restriction match {
+            case Some(restriction) => restriction.base match {
+              case Some(name) => name
+              case None => s.name.getOrElse("")
+            }
+            case None => s.name.getOrElse("")
+          }
+        }
         case x: XSDType => x match {
           case p: XSNMToken => " [\"" + p.value + "\"] "
           case _ => " " + x.name
@@ -91,7 +98,7 @@ class CodeGenerator(schema: Schema) {
 
       case _ => Some("")
     }
-    elementStart + typeString + restrictions.get + " ;"
+    elementStart + " " + typeString + restrictions.get + " ;"
   }
 
   def generateRestrictions(element: Typeable): Option[String] = {
