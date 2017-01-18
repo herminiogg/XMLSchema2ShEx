@@ -1,20 +1,11 @@
-<shiptotype> { 
-:name xs:string {1}  ;
-:address xs:string {1}  ;
-:city xs:string {1}  ;
-:country xs:string {1}  ;
-
+<station> { 
+:name  xs:string {1}  ;
+:id  xs:positiveInteger {1}  ;
 }
-<shipordertype> { 
-:orderperson xs:string {1}  ;
-:shipto  @<shiptotype> {1}  ;
-:item  @<itemtype> +  ;
-:orderid xs:string {1} PATTERN [0-9]{6} ;
-}
-<itemtype> { 
-:title xs:string {1}  ;
-:note xs:string ?  ;
-:quantity xs:positiveInteger {1}  ;
-:price xs:decimal {1}  ;
-
+<driver> { 
+:name  xs:string {1}  ;
+:email  xs:string {1}  ;
+:phone  xs:string {1}  ;
+:avatar  xs:string {1}  ;
+:id  xs:positiveInteger {1}  ;
 }
