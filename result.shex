@@ -1,11 +1,35 @@
-<station> { 
-:name  xs:string {1}  ;
-:id  xs:positiveInteger {1}  ;
-}
 <driver> { 
 :name  xs:string {1}  ;
+:birth_date  xs:date {1}  ;
 :email  xs:string {1}  ;
 :phone  xs:string {1}  ;
 :avatar  xs:string {1}  ;
 :id  xs:positiveInteger {1}  ;
+}
+<station> { 
+:name  xs:string {1}  ;
+:id  xs:positiveInteger {1}  ;
+}
+<lvb_system> { 
+:name  xs:string {1}  ;
+:capacity  xs:integer {1}  ;
+:driver  *  ;
+:id  xs:positiveInteger {1}  ;
+}
+<lvb_system> { 
+:code  xs:string {1}  ;
+:type  xs:string {1}  ;
+:start_time_operation  xs:time {1}  ;
+:end_time_operation  xs:time {1}  ;
+:count_vehicles xs:integer {0, 10}  ;
+:map  xs:string {1}  ;
+:start_station  @<station> ?  ;
+:end_station  @<station> ?  ;
+:intermediate_stations  @<station> {0, 5}  ;
+:vehicles_line  @<vehicles_line> {0, 10}  ;
+:id  xs:positiveInteger {1}  ;
+}
+<lvb_system> { 
+:line  @<line> *  ;
+
 }

@@ -56,7 +56,7 @@ class XMLSchemaParser extends JavaTokenParsers {
     case _ ~ attributes ~ _ ~ restriction ~ _ => SimpleType(attributes, restriction)
   }
 
-  def attributes: Parser[Attributes] = rep("[A-Za-z:]*=(\"|')[A-Za-z0-9:/.#{}\\-\\[\\]\\\\]*(\"|')".r) ^^ { a => {
+  def attributes: Parser[Attributes] = rep("[A-Za-z:]*=(\"|')[A-Za-z0-9:_/.#{}\\-\\[\\]\\\\]*(\"|')".r) ^^ { a => {
     Attributes(a.map(_.split("=").toList match {
       case x :: xs => (x.toString, xs.head.toString)
     }).toMap)
