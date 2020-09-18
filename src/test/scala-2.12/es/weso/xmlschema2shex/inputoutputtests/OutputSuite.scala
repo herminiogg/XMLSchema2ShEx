@@ -1,12 +1,13 @@
 package es.weso.xmlschema2shex.inputoutputtests
 
 import es.weso.xmlschema2shex.parser.XMLSchema2ShexParser
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
 /**
   * Created by herminio on 19/12/16.
   */
-class OutputSuite extends FunSuite with Matchers {
+class OutputSuite extends AnyFunSuite with Matchers {
 
   test("XML Schema conversion from Microsoft example") {
     val xml = """

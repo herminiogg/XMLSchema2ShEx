@@ -71,8 +71,10 @@ object Parser extends XMLSchemaParser{
                 |</xs:element>
                 |</xs:schema>""".stripMargin
 
-    val output = XMLSchema2ShexParser().parse(xml, None)
-    val fw = new FileWriter("result.shex")
+    /**val output = XMLSchema2ShexParser().parse(xml, None)
+    val fw = new FileWriter("result.shex")*/
+    val output = XMLSchema2ShexParser().convertToShExML(xml)
+    val fw = new FileWriter("result.shexml")
     fw.write(output)
     fw.close()
     println(output)

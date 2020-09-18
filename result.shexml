@@ -1,0 +1,63 @@
+ITERATOR lvb_system </lvb_system> {
+	ITERATOR line <line> {
+		FIELD id <id> 
+		FIELD code <code> 
+		FIELD type <type> 
+		FIELD start_time_operation <start_time_operation> 
+		FIELD end_time_operation <end_time_operation> 
+		FIELD count_vehicles <count_vehicles> 
+		FIELD map <map> 
+		ITERATOR start_station <start_station> {
+			FIELD id <id> 
+			FIELD name <name> 
+		}
+		ITERATOR end_station <end_station> {
+			FIELD id <id> 
+			FIELD name <name> 
+		}
+		ITERATOR intermediate_stations <intermediate_stations> {
+			FIELD id <id> 
+			FIELD name <name> 
+		}
+		ITERATOR vehicles_line <vehicles_line> {
+			FIELD id <id> 
+			FIELD name <name> 
+			FIELD capacity <capacity> 
+			FIELD driver <driver> 
+		}
+	}
+}
+:driver :[] {
+	:name :[] xs:string ;
+	:birth_date :[] xs:date ;
+	:email :[] xs:string ;
+	:phone :[] xs:string ;
+	:avatar :[] xs:string ;
+	:id :[] xs:positiveInteger ;
+}
+:station :[] {
+	:name :[] xs:string ;
+	:id :[] xs:positiveInteger ;
+}
+:vehicles_line :[] {
+	:name :[] xs:string ;
+	:capacity :[] xs:integer ;
+	:driver @:driver ;
+	:id :[] xs:positiveInteger ;
+}
+:line :[] {
+	:code :[] xs:string ;
+	:type :[] xs:string ;
+	:start_time_operation :[] xs:time ;
+	:end_time_operation :[] xs:time ;
+	:count_vehicles :[] xs:integer ;
+	:map :[] xs:string ;
+	:start_station @:station ;
+	:end_station @:station ;
+	:intermediate_stations @:station ;
+	:vehicles_line @:vehicles_line ;
+	:id :[] xs:positiveInteger ;
+}
+:lvb_system :[] {
+	:line @:line ;
+}

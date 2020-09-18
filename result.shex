@@ -1,35 +1,236 @@
-<driver> { 
-:name  xs:string {1}  ;
-:birth_date  xs:date {1}  ;
-:email  xs:string {1}  ;
-:phone  xs:string {1}  ;
-:avatar  xs:string {1}  ;
-:id  xs:positiveInteger {1}  ;
+ITERATOR lvb_system </lvb_system> { 
+	FIELD line <line> 
+List(ITERATOR line </line> { 
+	FIELD code <code> 
+ xs:string
+FIELD type <type> 
+ xs:string
+FIELD start_time_operation <start_time_operation> 
+ xs:time
+FIELD end_time_operation <end_time_operation> 
+ xs:time
+FIELD count_vehicles <count_vehicles> 
+FIELD xs:integer <xs:integer>
+FIELD map <map> 
+ xs:string
+FIELD start_station <start_station> 
+List(ITERATOR station </station> { 
+	FIELD name <name> 
+ xs:string
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
 }
-<station> { 
-:name  xs:string {1}  ;
-:id  xs:positiveInteger {1}  ;
+)
+FIELD end_station <end_station> 
+List(ITERATOR station </station> { 
+	FIELD name <name> 
+ xs:string
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
 }
-<lvb_system> { 
-:name  xs:string {1}  ;
-:capacity  xs:integer {1}  ;
-:driver  *  ;
-:id  xs:positiveInteger {1}  ;
+)
+FIELD intermediate_stations <intermediate_stations> 
+List(ITERATOR station </station> { 
+	FIELD name <name> 
+ xs:string
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
 }
-<lvb_system> { 
-:code  xs:string {1}  ;
-:type  xs:string {1}  ;
-:start_time_operation  xs:time {1}  ;
-:end_time_operation  xs:time {1}  ;
-:count_vehicles xs:integer {0, 10}  ;
-:map  xs:string {1}  ;
-:start_station  @<station> ?  ;
-:end_station  @<station> ?  ;
-:intermediate_stations  @<station> {0, 5}  ;
-:vehicles_line  @<vehicles_line> {0, 10}  ;
-:id  xs:positiveInteger {1}  ;
-}
-<lvb_system> { 
-:line  @<line> *  ;
+)
+FIELD vehicles_line <vehicles_line> 
+List(ITERATOR vehicles_line </vehicles_line> { 
+	FIELD name <name> 
+ xs:string
+FIELD capacity <capacity> 
+ xs:integer
+FIELD driver <driver> 
 
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+FIELD capacity <capacity> 
+ xs:integer
+FIELD driver <driver> 
+
+}
+)
+:id 
+ xs:positiveIntegerFIELD code <code> 
+ xs:string
+FIELD type <type> 
+ xs:string
+FIELD start_time_operation <start_time_operation> 
+ xs:time
+FIELD end_time_operation <end_time_operation> 
+ xs:time
+FIELD count_vehicles <count_vehicles> 
+FIELD xs:integer <xs:integer>
+FIELD map <map> 
+ xs:string
+FIELD start_station <start_station> 
+List(ITERATOR station </station> { 
+	FIELD name <name> 
+ xs:string
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+}
+)
+FIELD end_station <end_station> 
+List(ITERATOR station </station> { 
+	FIELD name <name> 
+ xs:string
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+}
+)
+FIELD intermediate_stations <intermediate_stations> 
+List(ITERATOR station </station> { 
+	FIELD name <name> 
+ xs:string
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+}
+)
+FIELD vehicles_line <vehicles_line> 
+List(ITERATOR vehicles_line </vehicles_line> { 
+	FIELD name <name> 
+ xs:string
+FIELD capacity <capacity> 
+ xs:integer
+FIELD driver <driver> 
+
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+FIELD capacity <capacity> 
+ xs:integer
+FIELD driver <driver> 
+
+}
+)
+}
+)
+FIELD line <line> 
+List(ITERATOR line </line> { 
+	FIELD code <code> 
+ xs:string
+FIELD type <type> 
+ xs:string
+FIELD start_time_operation <start_time_operation> 
+ xs:time
+FIELD end_time_operation <end_time_operation> 
+ xs:time
+FIELD count_vehicles <count_vehicles> 
+FIELD xs:integer <xs:integer>
+FIELD map <map> 
+ xs:string
+FIELD start_station <start_station> 
+List(ITERATOR station </station> { 
+	FIELD name <name> 
+ xs:string
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+}
+)
+FIELD end_station <end_station> 
+List(ITERATOR station </station> { 
+	FIELD name <name> 
+ xs:string
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+}
+)
+FIELD intermediate_stations <intermediate_stations> 
+List(ITERATOR station </station> { 
+	FIELD name <name> 
+ xs:string
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+}
+)
+FIELD vehicles_line <vehicles_line> 
+List(ITERATOR vehicles_line </vehicles_line> { 
+	FIELD name <name> 
+ xs:string
+FIELD capacity <capacity> 
+ xs:integer
+FIELD driver <driver> 
+
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+FIELD capacity <capacity> 
+ xs:integer
+FIELD driver <driver> 
+
+}
+)
+:id 
+ xs:positiveIntegerFIELD code <code> 
+ xs:string
+FIELD type <type> 
+ xs:string
+FIELD start_time_operation <start_time_operation> 
+ xs:time
+FIELD end_time_operation <end_time_operation> 
+ xs:time
+FIELD count_vehicles <count_vehicles> 
+FIELD xs:integer <xs:integer>
+FIELD map <map> 
+ xs:string
+FIELD start_station <start_station> 
+List(ITERATOR station </station> { 
+	FIELD name <name> 
+ xs:string
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+}
+)
+FIELD end_station <end_station> 
+List(ITERATOR station </station> { 
+	FIELD name <name> 
+ xs:string
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+}
+)
+FIELD intermediate_stations <intermediate_stations> 
+List(ITERATOR station </station> { 
+	FIELD name <name> 
+ xs:string
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+}
+)
+FIELD vehicles_line <vehicles_line> 
+List(ITERATOR vehicles_line </vehicles_line> { 
+	FIELD name <name> 
+ xs:string
+FIELD capacity <capacity> 
+ xs:integer
+FIELD driver <driver> 
+
+:id 
+ xs:positiveIntegerFIELD name <name> 
+ xs:string
+FIELD capacity <capacity> 
+ xs:integer
+FIELD driver <driver> 
+
+}
+)
+}
+)
 }
