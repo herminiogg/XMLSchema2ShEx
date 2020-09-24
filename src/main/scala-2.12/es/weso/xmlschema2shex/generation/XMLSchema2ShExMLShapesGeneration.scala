@@ -1,6 +1,6 @@
 package es.weso.xmlschema2shex.generation
 
-import es.weso.shexml.ast.{ObjectElement, Predicate, PredicateObject, ShExML, Shape, ShapeLink, ShapeVar}
+import es.weso.shexml.ast.{ExpOrVar, ObjectElement, Predicate, PredicateObject, ShExML, Shape, ShapeLink, ShapeVar, Var}
 import es.weso.xmlschema2shex.ast._
 
 /**
@@ -17,9 +17,8 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
 
   def generateTypes(): List[Shape] = {
     for(tag <- schema.tags) yield tag match {
-      case c: ComplexType => generateComplexType(c, c.name)
       case e: Element => e.aType.map {
-        case c: ComplexType => generateComplexType(c, e.name)
+        case c: ComplexType => generateComplexType(c, e.name, "")
         case _ => ""
       }.getOrElse("")
       case _ => ""
@@ -27,7 +26,7 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
     generatedShapes.values.toList.reverse
   }
 
-  def generateComplexType(complexType: ComplexType, elementName: Option[String]): Unit = {
+  def generateComplexType(complexType: ComplexType, elementName: Option[String], precedingNavigation: String): Unit = {
     val name = complexType.name match {
       case Some(aName) => aName
       case None => elementName match {
@@ -37,12 +36,19 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
     }
     val shapeVar = ShapeVar(":" + normalizeName(name))
     val prefix = ":" // to change
-    val predicateObjects = generateSequence(complexType.sequence, complexType.attributesElements)
-    val shape = Shape(shapeVar, prefix, null, predicateObjects, None)
+    val precedingNavigationString =
+      if(precedingNavigation.isEmpty) "iterator" else precedingNavigation + "." + normalizeName(name)
+    val predicateObjects = generateSequence(complexType.sequence, complexType.attributesElements, precedingNavigationString)
+    val action = predicateObjects.find(po => po.predicate.`extension`.matches("[a-zA-Z0-9]*id[a-zA-Z0-9]*")
+        && po.objectOrShapeLink.isInstanceOf[ObjectElement]) match {
+      case Some(id) => id.objectOrShapeLink.asInstanceOf[ObjectElement].action.orNull
+      case None => null
+    }
+    val shape = Shape(shapeVar, prefix, action, predicateObjects, None)
 
     for(element <- complexType.sequence.elements) yield element.aType match {
       case Some(nestedType) => nestedType match {
-        case c: ComplexType if !alreadyGeneratedShape.contains(c) => generateComplexType(c, element.name)
+        case c: ComplexType if !alreadyGeneratedShape.contains(c) => generateComplexType(c, element.name, precedingNavigationString)
         case _ => "" // to implement
       }
       case _ => ""
@@ -59,17 +65,17 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
     }
   }
 
-  def generateSequence(sequence: Sequence, attributes: List[AttributeElement]): List[PredicateObject] = {
+  def generateSequence(sequence: Sequence, attributes: List[AttributeElement], precedingActionNavigation: String): List[PredicateObject] = {
     val elementsPredicateObjects =
       (for(element <- sequence.elements)
-      yield generateElement(element))
+      yield generateElement(element, precedingActionNavigation))
     val attributesPredicateObjects =
       (for(attribute <- attributes)
-      yield generateElement(attribute))
+      yield generateElement(attribute, precedingActionNavigation))
     elementsPredicateObjects ::: attributesPredicateObjects
   }
 
-  def generateElement(element: Typeable): PredicateObject = {
+  def generateElement(element: Typeable, precedingActionNavigation: String): PredicateObject = {
     val predicate = element.name match {
       case Some(theName) => Predicate(":", normalizeName(theName))
       case None => element.ref match {
@@ -77,22 +83,29 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
       }
     }
     val objectOrShapeLink = element.aType match {
-      case Some(theType) => theType match {
-        case c: ComplexType =>
-          val name = c.name.getOrElse(c.ref.getOrElse(element.name.getOrElse(element.ref.get)))
-          ShapeLink(ShapeVar(":" + normalizeName(name)))
-        case s: SimpleType => {
-          s.restriction match {
-            case Some(restriction) => restriction.base match {
-              case Some(name) => ObjectElement(":", None, None, None, Some(normalizeName(name)), None)
-              case None => ObjectElement(":", None, None, None, s.name, None)
+      case Some(theType) => {
+        val varString =
+          if(precedingActionNavigation.isEmpty) Var(normalizeName(predicate.`extension`))
+          else Var(precedingActionNavigation + "." + normalizeName(predicate.`extension`))
+        val action = Some(varString)
+        theType match {
+          case c: ComplexType =>
+            val name = c.name.getOrElse(c.ref.getOrElse(element.name.getOrElse(element.ref.get)))
+            ShapeLink(ShapeVar(":" + normalizeName(name)))
+          case s: SimpleType => {
+            s.restriction match {
+              case Some(restriction) => restriction.base match {
+                case Some(name) =>
+                  ObjectElement(":", action, None, None, Some(normalizeName(name)), None)
+                case None => ObjectElement(":", action, None, None, s.name, None)
+              }
+              case None => ObjectElement(":", action, None, None, s.name, None)
             }
-            case None => ObjectElement(":", None, None, None, s.name, None)
           }
-        }
-        case x: XSDType => x match {
-          case p: XSNMToken => ObjectElement(":", None, None, None, Some(p.value), None)
-          case _ => ObjectElement(":", None, None, None, Some(x.name), None)
+          case x: XSDType => x match {
+            case p: XSNMToken => ObjectElement(":", action, None, None, Some(p.value), None)
+            case _ => ObjectElement(":", action, None, None, Some(x.name), None)
+          }
         }
       }
       case None => element.theType match {

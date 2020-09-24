@@ -1,4 +1,5 @@
-ITERATOR lvb_system </lvb_system> {
+SOURCE example <http://example.com/example.xml>
+ITERATOR lvb_system <xpath:/lvb_system> {
 	ITERATOR line <line> {
 		FIELD id <id> 
 		FIELD code <code> 
@@ -27,36 +28,29 @@ ITERATOR lvb_system </lvb_system> {
 		}
 	}
 }
-:driver :[] {
-	:name :[] xs:string ;
-	:birth_date :[] xs:date ;
-	:email :[] xs:string ;
-	:phone :[] xs:string ;
-	:avatar :[] xs:string ;
-	:id :[] xs:positiveInteger ;
+EXPRESSION iterator <example.lvb_system>
+:station :[iterator.line.station.id] {
+	:name :[iterator.line.station.name] xs:string ;
+	:id :[iterator.line.station.id] xs:positiveInteger ;
 }
-:station :[] {
-	:name :[] xs:string ;
-	:id :[] xs:positiveInteger ;
-}
-:vehicles_line :[] {
-	:name :[] xs:string ;
-	:capacity :[] xs:integer ;
+:vehicles_line :[iterator.line.vehicles_line.id] {
+	:name :[iterator.line.vehicles_line.name] xs:string ;
+	:capacity :[iterator.line.vehicles_line.capacity] xs:integer ;
 	:driver @:driver ;
-	:id :[] xs:positiveInteger ;
+	:id :[iterator.line.vehicles_line.id] xs:positiveInteger ;
 }
-:line :[] {
-	:code :[] xs:string ;
-	:type :[] xs:string ;
-	:start_time_operation :[] xs:time ;
-	:end_time_operation :[] xs:time ;
-	:count_vehicles :[] xs:integer ;
-	:map :[] xs:string ;
+:line :[iterator.line.id] {
+	:code :[iterator.line.code] xs:string ;
+	:type :[iterator.line.type] xs:string ;
+	:start_time_operation :[iterator.line.start_time_operation] xs:time ;
+	:end_time_operation :[iterator.line.end_time_operation] xs:time ;
+	:count_vehicles :[iterator.line.count_vehicles] xs:integer ;
+	:map :[iterator.line.map] xs:string ;
 	:start_station @:station ;
 	:end_station @:station ;
 	:intermediate_stations @:station ;
 	:vehicles_line @:vehicles_line ;
-	:id :[] xs:positiveInteger ;
+	:id :[iterator.line.id] xs:positiveInteger ;
 }
 :lvb_system :[] {
 	:line @:line ;

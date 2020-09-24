@@ -1,6 +1,6 @@
 package es.weso.xmlschema2shex.generation
 
-import es.weso.shexml.ast.{AST, Declaration, DeclarationStatement, Field, FieldQuery, Iterator, NestedIterator, ShExML, Var, XmlPath}
+import es.weso.shexml.ast.{AST, Declaration, DeclarationStatement, Expression, Field, FieldQuery, Iterator, IteratorQuery, NestedIterator, ShExML, Source, URL, Var, XmlPath}
 import es.weso.xmlschema2shex.ast.{AttributeElement, ComplexType, Element, Schema, Sequence, SimpleType, Typeable}
 
 class XMLSchema2ShExMLDeclarationsConverter(schema: Schema, implicit val varTable: Map[String, Typeable]) extends NameNormalizator {
@@ -10,7 +10,10 @@ class XMLSchema2ShExMLDeclarationsConverter(schema: Schema, implicit val varTabl
       for(tag <- schema.tags if tag.isInstanceOf[Element]) yield {
         convertElement(tag.asInstanceOf[Element])
     }
-    val declarations = elements.map(d => Declaration(d.asInstanceOf[DeclarationStatement]))
+    val source = List(Source(Var("example"), URL("http://example.com/example.xml")))
+    val iterator = List(Expression(Var("iterator"), IteratorQuery(source.head.name, elements.head.asInstanceOf[Iterator].name)))
+    val declarations = (source ::: elements ::: iterator)
+      .map(d => Declaration(d.asInstanceOf[DeclarationStatement]))
     ShExML(declarations, Nil, Nil)
   }
 

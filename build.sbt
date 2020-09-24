@@ -11,5 +11,6 @@ resolvers += "jitpack" at "https://jitpack.io"
 libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.2" % "test"
 libraryDependencies += "com.github.herminiogg" % "shexml" % "master-SNAPSHOT"
+libraryDependencies += "info.picocli" % "picocli" % "4.0.4"
 
 

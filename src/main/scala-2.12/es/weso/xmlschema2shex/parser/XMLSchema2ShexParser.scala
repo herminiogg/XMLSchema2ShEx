@@ -18,7 +18,7 @@ case class XMLSchema2ShexParser() extends XMLSchemaParser {
     val schema = parseAll(root, xmlSchemaWithoutComments).get
     new SemanticChecker(schema).check()
     val decoratedSchema = new TypeDecorator(new NameDecorator(schema).decorate()).decorate()
-    new CodeGeneratorShExML(decoratedSchema).generate()
+    new CodeGenerator(decoratedSchema).generate()
   }
 
   def convertToShExML(xmlSchema: String): String = {

@@ -9,50 +9,50 @@ import scala.util.parsing.combinator._
 
 class XMLSchemaParser extends JavaTokenParsers {
 
-  def root: Parser[Schema] = opt("<?xml"~attributes~"?>")~"<xs:schema"~attributes~">"~rep(tags)~"</xs:schema>" ^^ {
+  def root: Parser[Schema] = opt("<?xml"~attributes~"?>")~openingTag("schema")~attributes~">"~rep(tags)~closingTag("schema") ^^ {
     case _ ~ _ ~ attributes ~ _ ~ tags ~ _ => Schema(attributes, tags)
   }
 
   def tags: Parser[Tag] = element | complexType | simpleType | attribute
 
   def element: Parser[Element] =
-    "<xs:element"~attributes~">"~opt(simpleType)~"</xs:element>" ^^ {
+    openingTag("element")~attributes~">"~opt(simpleType)~closingTag("element") ^^ {
       case _ ~ attributes ~ _ ~ option ~ _ => Element(attributes, option)
-    } | "<xs:element"~attributes~">"~opt(complexType)~"</xs:element>" ^^ {
+    } | openingTag("element")~attributes~">"~opt(complexType)~closingTag("element") ^^ {
       case _ ~ attributes ~ _ ~ option ~ _ => Element(attributes, option)
-    } |"<xs:element"~attributes~"/>" ^^ {
+    } |openingTag("element")~attributes~"/>" ^^ {
       case _ ~ attributes ~ _ => Element(attributes, None)
     }
 
   def attribute: Parser[AttributeElement] =
-    "<xs:attribute"~attributes~">"~opt(simpleType)~"</xs:attribute>" ^^ {
+    openingTag("attribute")~attributes~">"~opt(simpleType)~closingTag("attribute") ^^ {
     case _ ~ attributes ~ _ ~ option ~ _ => AttributeElement(attributes, option)
-  } | "<xs:attribute"~attributes~">"~opt(complexType)~"</xs:attribute>" ^^ {
+  } | openingTag("attribute")~attributes~">"~opt(complexType)~closingTag("attribute") ^^ {
     case _ ~ attributes ~ _ ~ option ~ _ => AttributeElement(attributes, option)
-  } |"<xs:attribute"~attributes~"/>" ^^ {
+  } |openingTag("attribute")~attributes~"/>" ^^ {
     case _ ~ attributes ~ _ => AttributeElement(attributes, None)
   }
 
-  def complexType: Parser[ComplexType] = "<xs:complexType"~attributes~">"~sequence~opt(attributesList)~"</xs:complexType>" ^^ {
+  def complexType: Parser[ComplexType] = openingTag("complexType")~attributes~">"~sequence~opt(attributesList)~closingTag("complexType") ^^ {
     case _ ~ attributes ~ _ ~ sequence ~ attributesList ~_ =>
       ComplexType(attributes, sequence, attributesList.getOrElse(List()))
   }
 
-  def sequence: Parser[Sequence] = "<xs:sequence>"~rep1(element)~"</xs:sequence>" ^^ {
+  def sequence: Parser[Sequence] = fullOpeningTag("sequence")~rep1(element)~closingTag("sequence") ^^ {
     case _ ~ elements ~ _ => Sequence(elements)
   }
 
-  def complexContent: Parser[Any] = "<xs:complexContent>"~opt(extension)~opt(restriction)~"</xs:complexContent>"
+  def complexContent: Parser[Any] = fullOpeningTag("complexContent")~opt(extension)~opt(restriction)~closingTag("complexContent")
 
-  def extension: Parser[Any] = "<xs:extension"~attributes~">"~opt(attributesList)~"</xs:extension>"
+  def extension: Parser[Any] = openingTag("extension")~attributes~">"~opt(attributesList)~closingTag("extension")
 
-  def attributesList: Parser[List[AttributeElement]] = rep("<xs:attribute"~attributes~"/>") ^^ {
+  def attributesList: Parser[List[AttributeElement]] = rep(openingTag("attribute")~attributes~"/>") ^^ {
     _.map {
       case _ ~ attributes ~ _ => AttributeElement(attributes, None)
     }
   }
 
-  def simpleType: Parser[SimpleType] = "<xs:simpleType"~attributes~">"~opt(restriction)~"</xs:simpleType>" ^^ {
+  def simpleType: Parser[SimpleType] = openingTag("simpleType")~attributes~">"~opt(restriction)~closingTag("simpleType") ^^ {
     case _ ~ attributes ~ _ ~ restriction ~ _ => SimpleType(attributes, restriction)
   }
 
@@ -63,43 +63,49 @@ class XMLSchemaParser extends JavaTokenParsers {
   }
   }
 
-  def restriction: Parser[Restriction] = "<xs:restriction"~attributes~">"~rep(restrictions) ~"</xs:restriction>" ^^ {
+  def restriction: Parser[Restriction] = openingTag("restriction")~attributes~">"~rep(restrictions) ~closingTag("restriction") ^^ {
     case _ ~ attributes ~ _ ~ restrictions ~ _ => Restriction(attributes, Some(restrictions), None, None)
   } |
-    "<xs:restriction"~attributes~">"~sequence~opt(attributesList) ~"</xs:restriction>" ^^ {
+    openingTag("restriction")~attributes~">"~sequence~opt(attributesList) ~closingTag("restriction") ^^ {
       case _ ~ attributes ~_ ~ sequence ~ attributeList ~ _ => Restriction(attributes, None, Some(sequence), attributeList)
-  } | "<xs:restriction"~attributes~"/>" ^^{
+  } | openingTag("restriction")~attributes~"/>" ^^{
     case _ ~ attributes ~ _ => Restriction(attributes, None, None, None)
   }
 
   def restrictions: Parser[RestrictionModifier] = maxExclusiveRestriction | minExclusiveRestriction |
     maxInclusiveRestriction | minInclusiveRestriction | patternRestriction | enumeration
 
-  def maxExclusiveRestriction: Parser[MaxExclusive] = "<xs:maxExclusive"~attributes~"/>" ^^ {
+  def maxExclusiveRestriction: Parser[MaxExclusive] = openingTag("maxExclusive")~attributes~"/>" ^^ {
     case _ ~ attributes ~ _ => MaxExclusive(attributes)
   }
 
-  def minExclusiveRestriction: Parser[MinExclusive] = "<xs:minExclusive"~attributes~"/>" ^^ {
+  def minExclusiveRestriction: Parser[MinExclusive] = openingTag("minExclusive")~attributes~"/>" ^^ {
     case _ ~ attributes ~ _ => MinExclusive(attributes)
   }
 
-  def maxInclusiveRestriction: Parser[MaxInclusive] = "<xs:maxInclusive"~attributes~"/>" ^^ {
+  def maxInclusiveRestriction: Parser[MaxInclusive] = openingTag("maxInclusive")~attributes~"/>" ^^ {
     case _ ~ attributes ~ _ => MaxInclusive(attributes)
   }
 
-  def minInclusiveRestriction: Parser[MinInclusive] = "<xs:minInclusive"~attributes~"/>" ^^ {
+  def minInclusiveRestriction: Parser[MinInclusive] = openingTag("minInclusive")~attributes~"/>" ^^ {
     case _ ~ attributes ~ _ => MinInclusive(attributes)
   }
 
-  def patternRestriction: Parser[Pattern] = "<xs:pattern"~attributes~"/>" ^^ {
+  def patternRestriction: Parser[Pattern] = openingTag("pattern")~attributes~"/>" ^^ {
     case _ ~ attributes ~ _ => Pattern(attributes)
   }
 
-  def enumeration: Parser[Enumeration] = "<xs:enumeration"~attributes~"/>" ^^ {
+  def enumeration: Parser[Enumeration] = openingTag("enumeration")~attributes~"/>" ^^ {
     case _ ~ attributes ~ _ => Enumeration(attributes)
   }
 
-  def annotation: Parser[Any] = "<xs:annotation>"~"".r~"</xs:annotation>"
+  def annotation: Parser[Any] = openingTag("annotation")~"".r~closingTag("annotation")
+
+  private def openingTag(name: String) = ("<(xs|xsd):" + name).r
+
+  private def fullOpeningTag(name: String) = ("<(xs|xsd):" + name + ">").r
+
+  private def closingTag(name: String) = ("<\\/(xs|xsd):" + name + ">").r
 
 
 }
