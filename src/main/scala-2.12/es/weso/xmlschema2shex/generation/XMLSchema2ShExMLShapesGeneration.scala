@@ -34,15 +34,16 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
         case None => throw new Exception("No name to generate the shape")
       }
     }
-    val shapeVar = ShapeVar(":" + normalizeName(name))
-    val prefix = ":" // to change
+    val shapeVar = ShapeVar(getDefaultPrefix() + normalizeName(name))
+    val prefix = getDefaultPrefix()
     val precedingNavigationString =
-      if(precedingNavigation.isEmpty) "iterator" else precedingNavigation + "." + normalizeName(name)
+      if(precedingNavigation.isEmpty) "exp" else precedingNavigation + "." + normalizeName(name)
     val predicateObjects = generateSequence(complexType.sequence, complexType.attributesElements, precedingNavigationString)
     val action = predicateObjects.find(po => po.predicate.`extension`.matches("[a-zA-Z0-9]*id[a-zA-Z0-9]*")
         && po.objectOrShapeLink.isInstanceOf[ObjectElement]) match {
       case Some(id) => id.objectOrShapeLink.asInstanceOf[ObjectElement].action.orNull
-      case None => null
+      case None => Var("subjectAutoincrementId")
+
     }
     val shape = Shape(shapeVar, prefix, action, predicateObjects, None)
 
@@ -77,9 +78,9 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
 
   def generateElement(element: Typeable, precedingActionNavigation: String): PredicateObject = {
     val predicate = element.name match {
-      case Some(theName) => Predicate(":", normalizeName(theName))
+      case Some(theName) => Predicate(getDefaultPrefix(), normalizeName(theName))
       case None => element.ref match {
-        case Some(ref) => Predicate(":", normalizeName(ref))
+        case Some(ref) => Predicate(getDefaultPrefix(), normalizeName(ref))
       }
     }
     val objectOrShapeLink = element.aType match {
@@ -91,25 +92,25 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
         theType match {
           case c: ComplexType =>
             val name = c.name.getOrElse(c.ref.getOrElse(element.name.getOrElse(element.ref.get)))
-            ShapeLink(ShapeVar(":" + normalizeName(name)))
+            ShapeLink(ShapeVar(getDefaultPrefix() + normalizeName(name)))
           case s: SimpleType => {
             s.restriction match {
               case Some(restriction) => restriction.base match {
                 case Some(name) =>
-                  ObjectElement(":", action, None, None, Some(normalizeName(name)), None)
-                case None => ObjectElement(":", action, None, None, s.name, None)
+                  ObjectElement(getDefaultPrefix(), action, None, None, Some(normalizeName(name)), None)
+                case None => ObjectElement(getDefaultPrefix(), action, None, None, s.name, None)
               }
-              case None => ObjectElement(":", action, None, None, s.name, None)
+              case None => ObjectElement(getDefaultPrefix(), action, None, None, s.name, None)
             }
           }
           case x: XSDType => x match {
-            case p: XSNMToken => ObjectElement(":", action, None, None, Some(p.value), None)
-            case _ => ObjectElement(":", action, None, None, Some(x.name), None)
+            case p: XSNMToken => ObjectElement(getDefaultPrefix(), action, None, None, None, None) // that will be pattern but not supported right now in ShExML
+            case _ => ObjectElement(getDefaultPrefix(), action, None, None, Some(x.name), None)
           }
         }
       }
       case None => element.theType match {
-        case Some(typeName) => ShapeLink(ShapeVar(":" + normalizeName(typeName)))
+        case Some(typeName) => ShapeLink(ShapeVar(getDefaultPrefix() + normalizeName(typeName)))
       }
     }
     val restrictions = element match {
@@ -136,6 +137,12 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
     }).getOrElse("")
     val pattern = element.pattern.map("PATTERN " + _).getOrElse("")
     Some(List(boundaries, pattern).mkString(" "))
+  }
+
+  private def getDefaultPrefix(): String = {
+    if(schema.attributes.attributes.exists(_._1 == "targetNamespace"))
+      "tn:"
+    else ":"
   }
 
 }

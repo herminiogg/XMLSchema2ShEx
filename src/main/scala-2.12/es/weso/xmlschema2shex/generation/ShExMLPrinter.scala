@@ -1,15 +1,17 @@
 package es.weso.xmlschema2shex.generation
 
-import es.weso.shexml.ast.{Declaration, Expression, Field, Iterator, IteratorQuery, NestedIterator, ObjectElement, PredicateObject, ShExML, Shape, ShapeLink, Source, URL, Var}
+import es.weso.shexml.ast.{AutoIncrement, Declaration, Expression, Field, Iterator, IteratorQuery, NestedIterator, ObjectElement, PredicateObject, Prefix, ShExML, Shape, ShapeLink, Source, URL, Var}
 
 class ShExMLPrinter {
 
   def print(s: ShExML): String = {
     val declarationsToPrint = s.declaration.map {
       case Declaration(declarationStatement) => declarationStatement match {
+        case p: Prefix => print(p)
         case i: Iterator => print(i, -1)
         case s: Source => print(s)
         case e: Expression => print(e)
+        case a: AutoIncrement => print(a)
       }
     }
     val shapesToPrint = s.shape.map {
@@ -25,7 +27,7 @@ class ShExMLPrinter {
   def print(i: Iterator, indentation: Int): String = {
     val indentationString = generateIndentation(indentation)
     indentationString +
-    "ITERATOR " + i.name.name + " <xpath:" + i.queryClause.query + "> {\n" +
+    "ITERATOR " + i.name.name + " <xpath: " + i.queryClause.query + "> {\n" +
       i.fields.map(print(_, indentation + 1)).mkString("") +
       i.iterators.map(print(_, indentation + 1)).mkString("") +
      indentationString + "}\n"
@@ -75,6 +77,17 @@ class ShExMLPrinter {
     val iteratorQuery = exp.exp.asInstanceOf[IteratorQuery]
     val secondVar = iteratorQuery.composedVar.asInstanceOf[Var]
     "EXPRESSION " + exp.name.name + " <" + iteratorQuery.firstVar.name + "." + secondVar.name + ">\n"
+  }
+
+  def print(autoId: AutoIncrement): String = {
+    val precedentString = autoId.precedentString.map('"' + _ + "\"" + " + ").getOrElse("")
+    val closingString = autoId.closingString.map(" + " + '"' + _ + "\"").getOrElse("")
+    "AUTOINCREMENT " + autoId.name.name + " <" + precedentString + autoId.from + " to " +
+      autoId.to + " by " + autoId.by + closingString + ">\n"
+  }
+
+  def print(prefix: Prefix): String = {
+    "PREFIX " + prefix.name.name + " <" + prefix.url.url + ">\n"
   }
 
   private def generateIndentation(indentation: Int): String = {

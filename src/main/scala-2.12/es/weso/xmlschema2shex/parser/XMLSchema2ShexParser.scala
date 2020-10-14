@@ -4,7 +4,7 @@ import es.weso.shexml.ast.ShExML
 import es.weso.xmlschema2shex.ast.Typeable
 import es.weso.xmlschema2shex.check.SemanticChecker
 import es.weso.xmlschema2shex.decorator.{NameDecorator, TypeDecorator}
-import es.weso.xmlschema2shex.generation.{CodeGenerator, CodeGeneratorShExML, ShExMLPrinter, VarTableBuilder, XMLSchema2ShExMLDeclarationsConverter, XMLSchema2ShExMLShapesGeneration}
+import es.weso.xmlschema2shex.generation.{CodeGenerator, CodeGeneratorShExML, ShExMLPrinter, VarTableBuilder, XMLSchema2ShExMLDeclarationsConverter, XMLSchema2ShExMLShapesGeneration, XMLSchema2ShexCompletionGenerator}
 
 import scala.collection.mutable
 
@@ -30,7 +30,8 @@ case class XMLSchema2ShexParser() extends XMLSchemaParser {
     new VarTableBuilder(varTable).visit(decoratedSchema)
     val declarations = new XMLSchema2ShExMLDeclarationsConverter(decoratedSchema, varTable.toMap).convert().declaration
     val shapes = new XMLSchema2ShExMLShapesGeneration(decoratedSchema).generate().shape
-    new ShExMLPrinter().print(ShExML(declarations, Nil, shapes))
+    val finalDeclarations = new XMLSchema2ShexCompletionGenerator(declarations, shapes).generate()
+    new ShExMLPrinter().print(ShExML(finalDeclarations, Nil, shapes))
   }
 
   private def removeComments(xmlSchema: String): String = {
