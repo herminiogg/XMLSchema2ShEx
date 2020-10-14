@@ -8,8 +8,7 @@ import es.weso.xmlschema2shex.ast._
   */
 class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator {
 
-  val alreadyGeneratedShape = scala.collection.mutable.ListBuffer.empty[ComplexType]
-  val generatedShapes = scala.collection.mutable.HashMap.empty[ComplexType, Shape]
+  val generatedShapes = scala.collection.mutable.ListBuffer.empty[Shape]
 
   def generate(): ShExML = {
     ShExML(Nil, Nil, generateTypes())
@@ -23,13 +22,13 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
       }.getOrElse("")
       case _ => ""
     }
-    generatedShapes.values.toList.reverse
+    generatedShapes.toList.reverse
   }
 
   def generateComplexType(complexType: ComplexType, elementName: Option[String], precedingNavigation: String): Unit = {
-    val name = complexType.name match {
+    val name = elementName match {
       case Some(aName) => aName
-      case None => elementName match {
+      case None => complexType.name match {
         case Some(eName) => eName
         case None => throw new Exception("No name to generate the shape")
       }
@@ -49,21 +48,12 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
 
     for(element <- complexType.sequence.elements) yield element.aType match {
       case Some(nestedType) => nestedType match {
-        case c: ComplexType if !alreadyGeneratedShape.contains(c) => generateComplexType(c, element.name, precedingNavigationString)
+        case c: ComplexType => generateComplexType(c, element.name, precedingNavigationString)
         case _ => "" // to implement
       }
       case _ => ""
     }
-
-    if(!alreadyGeneratedShape.contains(complexType)) {
-      alreadyGeneratedShape += complexType
-      generatedShapes += (complexType -> shape)
-    } else {
-      alreadyGeneratedShape -= complexType
-      generatedShapes -= complexType
-      alreadyGeneratedShape += complexType
-      generatedShapes += (complexType -> shape)
-    }
+    generatedShapes += shape
   }
 
   def generateSequence(sequence: Sequence, attributes: List[AttributeElement], precedingActionNavigation: String): List[PredicateObject] = {
