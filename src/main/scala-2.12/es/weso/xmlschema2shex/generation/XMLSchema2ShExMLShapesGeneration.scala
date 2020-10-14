@@ -81,7 +81,7 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
         val action = Some(varString)
         theType match {
           case c: ComplexType =>
-            val name = c.name.getOrElse(c.ref.getOrElse(element.name.getOrElse(element.ref.get)))
+            val name = element.name.getOrElse(element.ref.getOrElse(c.name.getOrElse(c.ref.get)))
             ShapeLink(ShapeVar(getDefaultPrefix() + normalizeName(name)))
           case s: SimpleType => {
             s.restriction match {
