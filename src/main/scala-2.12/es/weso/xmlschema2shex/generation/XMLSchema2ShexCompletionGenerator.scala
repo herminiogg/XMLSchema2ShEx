@@ -9,13 +9,16 @@ class XMLSchema2ShexCompletionGenerator(declarations: List[Declaration], shapes:
       case Some(declaration) => declarations :+ declaration
       case None => declarations
     }
-    completeExamplePrefix() +: declarationsWithAutoIncrement
+    completePrefixes() ::: declarationsWithAutoIncrement
   }
 
-  def completeExamplePrefix(): Declaration = {
-    Declaration(
-      Prefix(Var(":"), URL("http://example.org"))
+  def completePrefixes(): List[Declaration] = {
+    List(
+      Declaration(Prefix(Var(":"), URL("http://example.org"))),
+      Declaration(Prefix(Var("xs:"), URL("http://www.w3.org/2001/XMLSchema#"))),
+      Declaration(Prefix(Var("xsd:"), URL("http://www.w3.org/2001/XMLSchema#")))
     )
+
   }
 
   def completeAutoincrement(): Option[Declaration] = {
