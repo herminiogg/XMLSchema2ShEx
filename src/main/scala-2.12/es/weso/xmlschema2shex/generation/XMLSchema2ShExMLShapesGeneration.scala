@@ -95,7 +95,7 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
           }
           case x: XSDType => x match {
             case p: XSNMToken => ObjectElement(getDefaultPrefix(), action, None, None, None, None) // that will be pattern but not supported right now in ShExML
-            case _ => ObjectElement(getDefaultPrefix(), action, None, None, Some(x.name), None)
+            case _ => ObjectElement("", action, None, None, Some(x.name), None)
           }
         }
       }
