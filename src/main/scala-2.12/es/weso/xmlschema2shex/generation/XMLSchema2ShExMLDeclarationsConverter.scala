@@ -1,7 +1,7 @@
 package es.weso.xmlschema2shex.generation
 
 import es.weso.shexml.ast.{AST, Declaration, DeclarationStatement, Expression, Field, FieldQuery, Iterator, IteratorQuery, NestedIterator, Prefix, ShExML, Source, URL, Var, XmlPath}
-import es.weso.xmlschema2shex.ast.{AttributeElement, ComplexType, Element, Schema, Sequence, SimpleType, Typeable}
+import es.weso.xmlschema2shex.ast.{AttributeElement, ComplexType, Element, ElementsHolder, Schema, Sequence, SimpleType, Typeable}
 
 class XMLSchema2ShExMLDeclarationsConverter(schema: Schema, implicit val varTable: Map[String, Typeable]) extends NameNormalizator {
 
@@ -37,7 +37,7 @@ class XMLSchema2ShExMLDeclarationsConverter(schema: Schema, implicit val varTabl
 
   def convertComplexType(c: ComplexType, e: Element): Iterator = {
     val attributeElementsFields = c.attributesElements.map(convertAttributeElement)
-    val sequenceResults = convertSequence(c.sequence)
+    val sequenceResults = convertSequence(c.elementsHolder)
     val iteratorsFromSequence = sequenceResults.filter(_.isInstanceOf[Iterator]).map(_.asInstanceOf[Iterator])
     val nestedIterators = iteratorsFromSequence.map(i =>
       NestedIterator(i.name, XmlPath(i.queryClause.query.substring(1)), i.fields, i.iterators))
@@ -57,7 +57,7 @@ class XMLSchema2ShExMLDeclarationsConverter(schema: Schema, implicit val varTabl
     Field(Var(name), FieldQuery(name))
   }
 
-  def convertSequence(s: Sequence): List[AST] = {
-    s.elements.map(convertElement)
+  def convertSequence(e: ElementsHolder): List[AST] = {
+    e.elements.map(convertElement)
   }
 }

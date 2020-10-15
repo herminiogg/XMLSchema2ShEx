@@ -34,9 +34,9 @@ class CodeGenerator(schema: Schema) {
         case None => throw new Exception("No name to generate the shape")
       }
     }
-    val shape = "<" + name + "> { \n" + generateSequence(complexType.sequence, complexType.attributesElements) + "\n}\n"
+    val shape = "<" + name + "> { \n" + generateSequence(complexType.elementsHolder, complexType.attributesElements) + "\n}\n"
 
-    for(element <- complexType.sequence.elements) yield element.aType match {
+    for(element <- complexType.elementsHolder.elements) yield element.aType match {
       case Some(nestedType) => nestedType match {
         case c: ComplexType if !alreadyGeneratedShape.contains(c) => generateComplexType(c, Some(name))
         case _ => "" // to implement
@@ -55,9 +55,9 @@ class CodeGenerator(schema: Schema) {
     }
   }
 
-  def generateSequence(sequence: Sequence, attributes: List[AttributeElement]): String = {
+  def generateSequence(elementsHolder: ElementsHolder, attributes: List[AttributeElement]): String = {
     val elementsString =
-      (for(element <- sequence.elements)
+      (for(element <- elementsHolder.elements)
       yield generateElement(element)).mkString("\n")
     val attributesString =
       (for(attribute <- attributes)

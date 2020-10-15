@@ -62,7 +62,7 @@ case class AttributeElement(attributes: Attributes, aType: Option[Type]) extends
   val ref: Option[String] = attributes.attributes.get("ref")
 }
 
-case class ComplexType(attributes: Attributes, sequence: Sequence, attributesElements: List[AttributeElement]) extends Type {
+case class ComplexType(attributes: Attributes, elementsHolder: ElementsHolder, attributesElements: List[AttributeElement]) extends Type {
   val name = attributes.attributes.get("name")
   val ref = attributes.attributes.get("ref")
 }

@@ -20,7 +20,7 @@ class VarTableBuilder(varTable: mutable.Map[String, Typeable]) {
       ae.aType.foreach(visit)
     }
     case c: ComplexType => {
-      c.sequence.elements.foreach(visit)
+      c.elementsHolder.elements.foreach(visit)
       c.attributesElements.foreach(visit)
     }
 

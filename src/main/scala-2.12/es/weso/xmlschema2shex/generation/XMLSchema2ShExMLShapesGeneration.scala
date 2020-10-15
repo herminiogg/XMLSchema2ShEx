@@ -37,7 +37,7 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
     val prefix = getDefaultPrefix()
     val precedingNavigationString =
       if(precedingNavigation.isEmpty) "exp" else precedingNavigation + "." + normalizeName(name)
-    val predicateObjects = generateSequence(complexType.sequence, complexType.attributesElements, precedingNavigationString)
+    val predicateObjects = generateSequence(complexType.elementsHolder, complexType.attributesElements, precedingNavigationString)
     val action = predicateObjects.find(po => po.predicate.`extension`.matches("[a-zA-Z0-9]*id[a-zA-Z0-9]*")
         && po.objectOrShapeLink.isInstanceOf[ObjectElement]) match {
       case Some(id) => id.objectOrShapeLink.asInstanceOf[ObjectElement].action.orNull
@@ -46,7 +46,7 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
     }
     val shape = Shape(shapeVar, prefix, action, predicateObjects, None)
 
-    for(element <- complexType.sequence.elements) yield element.aType match {
+    for(element <- complexType.elementsHolder.elements) yield element.aType match {
       case Some(nestedType) => nestedType match {
         case c: ComplexType => generateComplexType(c, element.name, precedingNavigationString)
         case _ => "" // to implement
@@ -56,9 +56,9 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
     generatedShapes += shape
   }
 
-  def generateSequence(sequence: Sequence, attributes: List[AttributeElement], precedingActionNavigation: String): List[PredicateObject] = {
+  def generateSequence(elementsHolder: ElementsHolder, attributes: List[AttributeElement], precedingActionNavigation: String): List[PredicateObject] = {
     val elementsPredicateObjects =
-      (for(element <- sequence.elements)
+      (for(element <- elementsHolder.elements)
       yield generateElement(element, precedingActionNavigation))
     val attributesPredicateObjects =
       (for(attribute <- attributes)

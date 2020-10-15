@@ -32,13 +32,13 @@ class CodeGeneratorShExML(schema: Schema) {
       }
     }
 
-    val nestedValues = for(element <- complexType.sequence.elements) yield element match {
+    val nestedValues = for(element <- complexType.elementsHolder.elements) yield element match {
       case e: Element => List(generateElement(e))
       case _ => List("") // to implement
     }
 
     val iterator = "ITERATOR " + elementName.getOrElse("") + " </"+elementName.getOrElse("")+"> { \n" +
-      "\t" + generateSequence(complexType.sequence, complexType.attributesElements) +
+      "\t" + generateSequence(complexType.elementsHolder, complexType.attributesElements) +
       nestedValues.flatten.mkString("\n") + "\n}\n"
 
 
@@ -55,9 +55,9 @@ class CodeGeneratorShExML(schema: Schema) {
     }*/
   }
 
-  def generateSequence(sequence: Sequence, attributes: List[AttributeElement]): String = {
+  def generateSequence(elementsHolder: ElementsHolder, attributes: List[AttributeElement]): String = {
     val elementsString =
-      (for(element <- sequence.elements)
+      (for(element <- elementsHolder.elements)
       yield generateElement(element)).mkString("\n")
     val attributesString =
       (for(attribute <- attributes)

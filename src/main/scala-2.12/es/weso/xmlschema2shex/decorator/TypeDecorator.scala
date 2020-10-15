@@ -30,20 +30,20 @@ class TypeDecorator(schema: Schema) {
   }
 
   private def decorateComplexType(complexType: ComplexType): ComplexType = {
-    val newElementSequence = complexType.sequence.elements.map(decorateAllElements)
+    val newElementSequence = complexType.elementsHolder.elements.map(decorateAllElements)
     val newAttributesSequence = complexType.attributesElements.map(decorateAllAttributes)
-    val newSequence = complexType.sequence.copy(elements = newElementSequence)
-    complexType.copy(sequence = newSequence, attributesElements = newAttributesSequence)
+    val newSequence = complexType.elementsHolder.copyInstance(elements = newElementSequence)
+    complexType.copy(elementsHolder = newSequence, attributesElements = newAttributesSequence)
   }
 
   private def decorateAllElements(element: Element): Element = {
     val newElement = element.copy(aType = searchTypeForElement(element, schema.tags))
     val newType = newElement.aType.map({
       case c: ComplexType =>
-        val innerElements = for (elem <- c.sequence.elements) yield decorateAllElements(elem)
+        val innerElements = for (elem <- c.elementsHolder.elements) yield decorateAllElements(elem)
         val newAttributesSequence = c.attributesElements.map(decorateAllAttributes)
-        val newSequence = c.sequence.copy(elements = innerElements)
-        c.copy(sequence = newSequence, attributesElements = newAttributesSequence)
+        val newSequence = c.elementsHolder.copyInstance(elements = innerElements)
+        c.copy(elementsHolder = newSequence, attributesElements = newAttributesSequence)
       case s: SimpleType => s
       case x: XSDType => x
     })
@@ -66,7 +66,7 @@ class TypeDecorator(schema: Schema) {
           else {
             tag match {
               case c: ComplexType =>
-                if(c.name.equals(typeName)) Some(c) else searchTypeForElement(element, c.sequence.elements)
+                if(c.name.equals(typeName)) Some(c) else searchTypeForElement(element, c.elementsHolder.elements)
               case s: SimpleType =>
                 if(s.name.equals(typeName)) Some(s) else result
               case e: Typeable => {
@@ -94,7 +94,7 @@ class TypeDecorator(schema: Schema) {
       else {
         tag match {
           case c: ComplexType =>
-            if(c.name.equals(ref)) Some(c) else searchRefType(ref, c.sequence.elements)
+            if(c.name.equals(ref)) Some(c) else searchRefType(ref, c.elementsHolder.elements)
           case s: SimpleType =>
             if(s.name.equals(ref)) Some(s) else result
           case e: Typeable =>

@@ -21,7 +21,7 @@ class NameDecorator(schema: Schema) {
   }
 
   def decorateComplexType(complexType: ComplexType): ComplexType = {
-    val newElements = complexType.sequence.elements.map(element => {
+    val newElements = complexType.elementsHolder.elements.map(element => {
       val newElement = element.aType match {
         case Some(theType) => theType match {
           case c: ComplexType => {
@@ -41,8 +41,8 @@ class NameDecorator(schema: Schema) {
         newElement.copy(attributes = newOuterAttributes)
       } else newElement
     })
-    val newSequence = complexType.sequence.copy(elements = newElements)
-    complexType.copy(sequence = newSequence)
+    val newSequence = complexType.elementsHolder.copyInstance(elements = newElements)
+    complexType.copy(elementsHolder = newSequence)
   }
 
 }

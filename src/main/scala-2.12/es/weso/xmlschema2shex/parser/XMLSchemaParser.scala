@@ -33,13 +33,19 @@ class XMLSchemaParser extends JavaTokenParsers {
     case _ ~ attributes ~ _ => AttributeElement(attributes, None)
   }
 
-  def complexType: Parser[ComplexType] = openingTag("complexType")~attributes~">"~sequence~opt(attributesList)~closingTag("complexType") ^^ {
+  def complexType: Parser[ComplexType] = openingTag("complexType")~attributes~">"~(sequence | all)~opt(attributesList)~closingTag("complexType") ^^ {
     case _ ~ attributes ~ _ ~ sequence ~ attributesList ~_ =>
       ComplexType(attributes, sequence, attributesList.getOrElse(List()))
+    case _ ~ attributes ~ _ ~ all ~ attributesList ~_ =>
+      ComplexType(attributes, all, attributesList.getOrElse(List()))
   }
 
-  def sequence: Parser[Sequence] = fullOpeningTag("sequence")~rep1(element)~closingTag("sequence") ^^ {
+  def sequence: Parser[ElementsHolder] = fullOpeningTag("sequence")~rep1(element)~closingTag("sequence") ^^ {
     case _ ~ elements ~ _ => Sequence(elements)
+  }
+
+  def all: Parser[ElementsHolder] = fullOpeningTag("all")~rep1(element)~closingTag("all") ^^ {
+    case _ ~ elements ~ _ => All(elements)
   }
 
   def complexContent: Parser[Any] = fullOpeningTag("complexContent")~opt(extension)~opt(restriction)~closingTag("complexContent")
@@ -67,7 +73,7 @@ class XMLSchemaParser extends JavaTokenParsers {
     case _ ~ attributes ~ _ ~ restrictions ~ _ => Restriction(attributes, Some(restrictions), None, None)
   } |
     openingTag("restriction")~attributes~">"~sequence~opt(attributesList) ~closingTag("restriction") ^^ {
-      case _ ~ attributes ~_ ~ sequence ~ attributeList ~ _ => Restriction(attributes, None, Some(sequence), attributeList)
+      case _ ~ attributes ~_ ~ sequence ~ attributeList ~ _ => Restriction(attributes, None, Some(sequence.asInstanceOf[Sequence]), attributeList)
   } | openingTag("restriction")~attributes~"/>" ^^{
     case _ ~ attributes ~ _ => Restriction(attributes, None, None, None)
   }
