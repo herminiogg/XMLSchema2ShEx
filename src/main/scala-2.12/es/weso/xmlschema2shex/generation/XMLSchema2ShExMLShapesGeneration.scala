@@ -48,12 +48,20 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
 
     for(element <- complexType.elementsHolder.elements) yield element.aType match {
       case Some(nestedType) => nestedType match {
-        case c: ComplexType => generateComplexType(c, element.name, precedingNavigationString)
+        case c: ComplexType => {
+          val name = if(element.name.isDefined) element.name else element.ref
+          generateComplexType(c, name, precedingNavigationString)
+        }
         case _ => "" // to implement
       }
       case _ => ""
     }
-    generatedShapes += shape
+    if(!generatedShapes.exists(s => s.shapeName.name == shape.shapeName.name))
+      generatedShapes += shape
+    else {
+      val index = generatedShapes.indexOf(generatedShapes.find(s => s.shapeName.name == shape.shapeName.name).get)
+      generatedShapes.update(index, shape)
+    }
   }
 
   def generateSequence(elementsHolder: ElementsHolder, attributes: List[AttributeElement], precedingActionNavigation: String): List[PredicateObject] = {
@@ -87,10 +95,10 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
             s.restriction match {
               case Some(restriction) => restriction.base match {
                 case Some(name) =>
-                  ObjectElement(getDefaultPrefix(), action, None, None, Some(normalizeName(name)), None)
-                case None => ObjectElement(getDefaultPrefix(), action, None, None, s.name, None)
+                  ObjectElement("", action, None, None, Some(normalizeName(name)), None)
+                case None => ObjectElement("", action, None, None, s.name, None)
               }
-              case None => ObjectElement(getDefaultPrefix(), action, None, None, s.name, None)
+              case None => ObjectElement("", action, None, None, s.name, None)
             }
           }
           case x: XSDType => x match {
