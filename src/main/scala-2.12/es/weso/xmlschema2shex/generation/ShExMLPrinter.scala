@@ -1,6 +1,6 @@
 package es.weso.xmlschema2shex.generation
 
-import es.weso.shexml.ast.{AutoIncrement, Declaration, Expression, Field, Iterator, IteratorQuery, NestedIterator, ObjectElement, PredicateObject, Prefix, ShExML, Shape, ShapeLink, Source, URL, Var}
+import es.weso.shexml.ast.{AutoIncrement, Declaration, Expression, Field, Iterator, IteratorQuery, NestedIterator, ObjectElement, PredicateObject, Prefix, QueryClause, ShExML, Shape, ShapeLink, Source, URL, Var}
 
 class ShExMLPrinter {
 
@@ -27,7 +27,7 @@ class ShExMLPrinter {
   def print(i: Iterator, indentation: Int): String = {
     val indentationString = generateIndentation(indentation)
     indentationString +
-    "ITERATOR " + i.name.name + " <xpath: " + i.queryClause.query + "> {\n" +
+    "ITERATOR " + i.name.name + " <xpath: " + i.queryClause.asInstanceOf[QueryClause].query + "> {\n" +
       i.fields.map(print(_, indentation + 1)).mkString("") +
       i.iterators.map(print(_, indentation + 1)).mkString("") +
      indentationString + "}\n"

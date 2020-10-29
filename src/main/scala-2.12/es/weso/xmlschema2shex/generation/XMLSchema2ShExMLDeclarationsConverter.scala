@@ -1,6 +1,6 @@
 package es.weso.xmlschema2shex.generation
 
-import es.weso.shexml.ast.{AST, Declaration, DeclarationStatement, Expression, Field, FieldQuery, Iterator, IteratorQuery, NestedIterator, Prefix, ShExML, Source, URL, Var, XmlPath}
+import es.weso.shexml.ast.{AST, Declaration, DeclarationStatement, Expression, Field, FieldQuery, Iterator, IteratorQuery, NestedIterator, Prefix, QueryClause, ShExML, Source, URL, Var, XmlPath}
 import es.weso.xmlschema2shex.ast.{AttributeElement, ComplexType, Element, ElementsHolder, Schema, Sequence, SimpleType, Typeable}
 
 class XMLSchema2ShExMLDeclarationsConverter(schema: Schema, implicit val varTable: Map[String, Typeable]) extends NameNormalizator {
@@ -40,7 +40,7 @@ class XMLSchema2ShExMLDeclarationsConverter(schema: Schema, implicit val varTabl
     val sequenceResults = convertSequence(c.elementsHolder)
     val iteratorsFromSequence = sequenceResults.filter(_.isInstanceOf[Iterator]).map(_.asInstanceOf[Iterator])
     val nestedIterators = iteratorsFromSequence.map(i =>
-      NestedIterator(i.name, XmlPath(i.queryClause.query.substring(1)), i.fields, i.iterators))
+      NestedIterator(i.name, XmlPath(i.queryClause.asInstanceOf[QueryClause].query.substring(1)), i.fields, i.iterators))
     val fieldsFromSequence = sequenceResults.filter(_.isInstanceOf[Field]).map(_.asInstanceOf[Field])
     val fields = attributeElementsFields ::: fieldsFromSequence
     val nameOption = if(e.name.isDefined) e.name else e.ref
