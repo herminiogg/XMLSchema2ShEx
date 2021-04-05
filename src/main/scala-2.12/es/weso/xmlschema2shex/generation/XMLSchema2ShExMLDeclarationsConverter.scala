@@ -32,7 +32,7 @@ class XMLSchema2ShExMLDeclarationsConverter(schema: Schema, implicit val varTabl
 
   private def generatePlainElement(e: Element): Field = {
     val name = normalizeName(e.name, e.ref)
-    Field(Var(name), FieldQuery(name))
+    Field(Var(name), FieldQuery(name), false, false)
   }
 
   def convertComplexType(c: ComplexType, e: Element): Iterator = {
@@ -51,12 +51,12 @@ class XMLSchema2ShExMLDeclarationsConverter(schema: Schema, implicit val varTabl
 
   def convertSimpleType(s: SimpleType, e: Element): Field = {
     val name = normalizeName(e.name, e.ref)
-    Field(Var(name), FieldQuery(name))
+    Field(Var(name), FieldQuery(name), false, false)
   }
 
   def convertAttributeElement(ae: AttributeElement): Field = {
     val name = normalizeName(ae.name, ae.ref)
-    Field(Var(name), FieldQuery(name))
+    Field(Var(name), FieldQuery(name), false, false)
   }
 
   def convertSequence(e: ElementsHolder): List[AST] = {

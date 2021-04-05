@@ -4,13 +4,13 @@ organization := "es.weso"
 
 version := "0.1-SNAPSHOT"
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.8"
 
 resolvers += "jitpack" at "https://jitpack.io"
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.2" % "test"
-libraryDependencies += "com.github.herminiogg" % "shexml" % "develop-SNAPSHOT"
+libraryDependencies += "com.github.herminiogg" % "shexml" % "v0.2.5"
 libraryDependencies += "info.picocli" % "picocli" % "4.0.4"
 
 

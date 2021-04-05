@@ -60,7 +60,7 @@ class ShExMLPrinter {
 
   def print(po: PredicateObject, indentation: Int): String = {
     val objectPart = po.objectOrShapeLink match {
-      case ObjectElement(prefix, action, literalValue, matcher, dataType, langTag) => literalValue match {
+      case ObjectElement(prefix, action, literalValue, matcher, dataType, langTag, None) => literalValue match {
         case Some(literal) => prefix + literal + dataType.getOrElse("")
         case None => {
           val actionString = if(action.isDefined) action.get.asInstanceOf[Var].name else ""

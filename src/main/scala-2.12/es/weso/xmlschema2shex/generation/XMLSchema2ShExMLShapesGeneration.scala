@@ -1,6 +1,6 @@
 package es.weso.xmlschema2shex.generation
 
-import es.weso.shexml.ast.{ExpOrVar, ObjectElement, Predicate, PredicateObject, ShExML, Shape, ShapeLink, ShapeVar, Var}
+import es.weso.shexml.ast.{DataTypeLiteral, ExpOrVar, ObjectElement, Predicate, PredicateObject, ShExML, Shape, ShapeLink, ShapeVar, Var}
 import es.weso.xmlschema2shex.ast._
 
 /**
@@ -95,15 +95,15 @@ class XMLSchema2ShExMLShapesGeneration(schema: Schema) extends NameNormalizator 
             s.restriction match {
               case Some(restriction) => restriction.base match {
                 case Some(name) =>
-                  ObjectElement("", action, None, None, Some(normalizeName(name)), None)
-                case None => ObjectElement("", action, None, None, s.name, None)
+                  ObjectElement("", action, None, None, Some(DataTypeLiteral(normalizeName(name))), None, None)
+                case None => ObjectElement("", action, None, None, s.name.map(DataTypeLiteral), None, None)
               }
-              case None => ObjectElement("", action, None, None, s.name, None)
+              case None => ObjectElement("", action, None, None, s.name.map(DataTypeLiteral), None, None)
             }
           }
           case x: XSDType => x match {
-            case p: XSNMToken => ObjectElement(getDefaultPrefix(), action, None, None, None, None) // that will be pattern but not supported right now in ShExML
-            case _ => ObjectElement("", action, None, None, Some(x.name), None)
+            case p: XSNMToken => ObjectElement(getDefaultPrefix(), action, None, None, None, None, None) // that will be pattern but not supported right now in ShExML
+            case _ => ObjectElement("", action, None, None, Some(DataTypeLiteral(x.name)), None, None)
           }
         }
       }
