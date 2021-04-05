@@ -1,6 +1,6 @@
 package es.weso.xmlschema2shex.generation
 
-import es.weso.shexml.ast.{AutoIncrement, Declaration, Expression, Field, Iterator, IteratorQuery, NestedIterator, ObjectElement, PredicateObject, Prefix, QueryClause, ShExML, Shape, ShapeLink, Source, URL, Var}
+import es.weso.shexml.ast.{AutoIncrement, DataType, DataTypeGeneration, DataTypeLiteral, Declaration, Expression, Field, Iterator, IteratorQuery, NestedIterator, ObjectElement, PredicateObject, Prefix, QueryClause, ShExML, Shape, ShapeLink, Source, URL, Var}
 
 class ShExMLPrinter {
 
@@ -61,10 +61,10 @@ class ShExMLPrinter {
   def print(po: PredicateObject, indentation: Int): String = {
     val objectPart = po.objectOrShapeLink match {
       case ObjectElement(prefix, action, literalValue, matcher, dataType, langTag, None) => literalValue match {
-        case Some(literal) => prefix + literal + dataType.getOrElse("")
+        case Some(literal) => prefix + literal + printDatatype(dataType)
         case None => {
           val actionString = if(action.isDefined) action.get.asInstanceOf[Var].name else ""
-          prefix + "[" + actionString + "] " + dataType.getOrElse("")
+          prefix + "[" + actionString + "] " + printDatatype(dataType)
         }
       }
       case ShapeLink(shape) => "@" + shape.name
@@ -94,5 +94,10 @@ class ShExMLPrinter {
     val indentationStrings = (0 to indentation).map(_ => "\t")
     indentationStrings.mkString("")
   }
+
+  private def printDatatype(dt: Option[DataType]): String = dt.map({
+    case DataTypeLiteral(value) => value
+    case DataTypeGeneration(prefix, action, matcher) => "" //to be supported
+  }).getOrElse("")
 
 }
