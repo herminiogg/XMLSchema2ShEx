@@ -43,7 +43,7 @@ class Main extends Callable[Int] {
         fw.close()
       }
       println(result)
-      1
+      0
     } finally { fileHandler.close() }
   }
 
