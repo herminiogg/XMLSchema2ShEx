@@ -33,7 +33,7 @@ class ShExMLGenerationTests extends AnyFunSuite with Matchers {
                              |	FIELD price <price>
                              |}
                              |ITERATOR shiporder <xpath: /shiporder> {
-                             |	FIELD orderid <orderid>
+                             |	FIELD orderid <@orderid>
                              |	FIELD orderperson <orderperson>
                              |	ITERATOR shipto <shipto> {
                              |		FIELD name <name>
@@ -52,9 +52,9 @@ class ShExMLGenerationTests extends AnyFunSuite with Matchers {
                              |AUTOINCREMENT subjectAutoincrementId <"subject_" + 1 to 2147483647 by 1>""".stripMargin.replaceAll("\\s", ""))
     output should include (""":shiporder :[exp.orderid] {
                              |	:orderperson [exp.orderperson] xs:string ;
-                             |	:shipto @:shipto ;
-                             |	:item @:item ;
                              |	:orderid [exp.orderid] xs:string ;
+                             |  :shipto @:shipto ;
+                             |	:item @:item ;
                              |}
                              |:item :[subjectAutoincrementId] {
                              |	:title [exp.item.title] xs:string ;
@@ -80,7 +80,7 @@ class ShExMLGenerationTests extends AnyFunSuite with Matchers {
                              |SOURCE example <http://example.com/example.xml>
                              |""".stripMargin.replaceAll("\\s", ""))
     output should include ("""ITERATOR shiporder <xpath: /shiporder> {
-                             |	FIELD orderid <orderid>
+                             |	FIELD orderid <@orderid>
                              |	FIELD orderperson <orderperson>
                              |	ITERATOR shipto <shipto> {
                              |		FIELD name <name>
@@ -99,9 +99,9 @@ class ShExMLGenerationTests extends AnyFunSuite with Matchers {
                              |AUTOINCREMENT subjectAutoincrementId <"subject_" + 1 to 2147483647 by 1>""".stripMargin.replaceAll("\\s", ""))
     output should include (""":shiporder :[exp.orderid] {
                              |	:orderperson [exp.orderperson] xs:string ;
-                             |	:shipto @:shipto ;
-                             |	:item @:item ;
                              |	:orderid [exp.orderid] xs:string ;
+                             |  :shipto @:shipto ;
+                             |	:item @:item ;
                              |}
                              |:item :[subjectAutoincrementId] {
                              |	:title [exp.item.title] xs:string ;
@@ -158,10 +158,10 @@ class ShExMLGenerationTests extends AnyFunSuite with Matchers {
                              |SOURCE example <http://example.com/example.xml>
                              |""".stripMargin.replaceAll("\\s", ""))
     output should include ("""ITERATOR purchaseOrder <xpath: /purchaseOrder> {
-                             |	FIELD orderDate <orderDate>
+                             |	FIELD orderDate <@orderDate>
                              |	FIELD comment <comment>
                              |	ITERATOR shipTo <shipTo> {
-                             |		FIELD country <country>
+                             |		FIELD country <@country>
                              |		FIELD name <name>
                              |		FIELD street <street>
                              |		FIELD city <city>
@@ -169,7 +169,7 @@ class ShExMLGenerationTests extends AnyFunSuite with Matchers {
                              |		FIELD zip <zip>
                              |	}
                              |	ITERATOR billTo <billTo> {
-                             |		FIELD country <country>
+                             |		FIELD country <@country>
                              |		FIELD name <name>
                              |		FIELD street <street>
                              |		FIELD city <city>
@@ -178,7 +178,7 @@ class ShExMLGenerationTests extends AnyFunSuite with Matchers {
                              |	}
                              |	ITERATOR items <items> {
                              |		ITERATOR item <item> {
-                             |			FIELD partNum <partNum>
+                             |			FIELD partNum <@partNum>
                              |			FIELD productName <productName>
                              |			FIELD quantity <quantity>
                              |			FIELD USPrice <USPrice>
@@ -190,11 +190,11 @@ class ShExMLGenerationTests extends AnyFunSuite with Matchers {
                              |EXPRESSION exp <example.purchaseOrder>
                              |AUTOINCREMENT subjectAutoincrementId <"subject_" + 1 to 2147483647 by 1>""".stripMargin.replaceAll("\\s", ""))
     output should include ("""tn:purchaseOrder tn:[subjectAutoincrementId] {
-                             |	tn:shipTo @tn:shipTo ;
-                             |	tn:billTo @tn:billTo ;
                              |	tn:comment [exp.comment] xs:string ;
-                             |	tn:items @tn:items ;
                              |	tn:orderDate [exp.orderDate] xs:date ;
+                             |  tn:shipTo @tn:shipTo ;
+                             |	tn:billTo @tn:billTo ;
+                             | 	tn:items @tn:items ;
                              |}
                              |tn:items tn:[subjectAutoincrementId] {
                              |	tn:item @tn:item ;

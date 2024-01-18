@@ -1,6 +1,6 @@
 package com.herminiogarcia.xmlschema2shex.generation
 
-import com.herminiogarcia.shexml.ast.{Action, AutoIncrement, DataType, DataTypeGeneration, DataTypeLiteral, Declaration, Expression, Field, Iterator, IteratorQuery, LiteralSubject, NestedIterator, ObjectElement, PredicateObject, Prefix, QueryClause, ShExML, Shape, ShapeLink, ShapeVar, Source, URL, Var}
+import com.herminiogarcia.shexml.ast.{Action, AutoIncrement, DataType, DataTypeGeneration, DataTypeLiteral, Declaration, Expression, Field, Iterator, IteratorQuery, LiteralSubject, NestedIterator, ObjectElement, ObjectOrShapeLink, PredicateObject, Prefix, QueryClause, ShExML, Shape, ShapeLink, ShapeVar, Source, URL, Var}
 
 class ShExMLPrinter {
 
@@ -62,7 +62,8 @@ class ShExMLPrinter {
     }
     generateIndentation(indentation) +
     s.shapeName.name + " " + shapePrefix + "[" + shapeAction + "] {\n" +
-      s.predicateObjects.map(po => print(po, indentation + 1)).mkString("") +
+      s.predicateObjects.sortWith((l, r) => containsShapeLink((l.objectOrShapeLink, r.objectOrShapeLink)))
+        .map(po => print(po, indentation + 1)).mkString("") +
     "}\n"
   }
 
@@ -107,5 +108,12 @@ class ShExMLPrinter {
     case DataTypeLiteral(value) => value
     case DataTypeGeneration(prefix, action, matcher) => "" //to be supported
   }).getOrElse("")
+
+  val containsShapeLink: PartialFunction[(ObjectOrShapeLink, ObjectOrShapeLink), Boolean] = {
+    case (_: ShapeLink, _) => false
+    case (_, _: ShapeLink) => true
+    case _ => false
+  }
+
 
 }

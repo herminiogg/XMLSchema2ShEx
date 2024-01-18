@@ -56,7 +56,7 @@ class XMLSchema2ShExMLDeclarationsConverter(schema: Schema, implicit val varTabl
 
   def convertAttributeElement(ae: AttributeElement): Field = {
     val name = normalizeName(ae.name, ae.ref)
-    Field(Var(name), FieldQuery(name), false, false)
+    Field(Var(name), FieldQuery("@" + name), false, false)
   }
 
   def convertSequence(e: ElementsHolder): List[AST] = {
