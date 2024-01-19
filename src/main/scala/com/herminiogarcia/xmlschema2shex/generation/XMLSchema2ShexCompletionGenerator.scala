@@ -14,7 +14,7 @@ class XMLSchema2ShexCompletionGenerator(declarations: List[Declaration], shapes:
 
   def completePrefixes(): List[Declaration] = {
     List(
-      Declaration(Prefix(Var(":"), URL("http://example.org"))),
+      Declaration(Prefix(Var(":"), URL("http://example.com/"))),
       Declaration(Prefix(Var("xs:"), URL("http://www.w3.org/2001/XMLSchema#"))),
       Declaration(Prefix(Var("xsd:"), URL("http://www.w3.org/2001/XMLSchema#")))
     )

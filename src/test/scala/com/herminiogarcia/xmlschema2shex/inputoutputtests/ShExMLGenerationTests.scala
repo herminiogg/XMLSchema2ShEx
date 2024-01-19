@@ -14,7 +14,7 @@ class ShExMLGenerationTests extends AnyFunSuite with Matchers {
   test("Xml1 version") {
     val xml = Source.fromResource("xml1version.xsd").mkString
     val output = XMLSchema2ShexParser().convertToShExML(xml).stripMargin.replaceAll("\\s", "")
-    output should include ("""PREFIX : <http://example.org>
+    output should include ("""PREFIX : <http://example.com/>
                              |PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
                              |PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>""".stripMargin.replaceAll("\\s", ""))
     output should include ("""
@@ -73,7 +73,7 @@ class ShExMLGenerationTests extends AnyFunSuite with Matchers {
   test("""Xml2 version""") {
     val xml = Source.fromResource("xml2version.xsd").mkString
     val output = XMLSchema2ShexParser().convertToShExML(xml).stripMargin.replaceAll("\\s", "")
-    output should include ("""PREFIX : <http://example.org>
+    output should include ("""PREFIX : <http://example.com/>
                              |PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
                              |PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>""".stripMargin.replaceAll("\\s", ""))
     output should include ("""
@@ -120,7 +120,7 @@ class ShExMLGenerationTests extends AnyFunSuite with Matchers {
   test("XML Schema conversion for addresses") {
     val xml = Source.fromResource("address.xsd").mkString
     val output = XMLSchema2ShexParser().convertToShExML(xml).stripMargin.replaceAll("\\s", "")
-    output should include ("""PREFIX : <http://example.org>
+    output should include ("""PREFIX : <http://example.com/>
                              |PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
                              |PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>""".stripMargin.replaceAll("\\s", ""))
     output should include ("""
@@ -150,7 +150,7 @@ class ShExMLGenerationTests extends AnyFunSuite with Matchers {
   test("""XML Schema conversion from Microsoft example""") {
     val xml = Source.fromResource("purchaseOrderFull.xsd").mkString
     val output = XMLSchema2ShexParser().convertToShExML(xml).stripMargin.replaceAll("\\s", "")
-    output should include ("""PREFIX : <http://example.org>
+    output should include ("""PREFIX : <http://example.com/>
                              |PREFIX xs: <http://www.w3.org/2001/XMLSchema#>
                              |PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
                              |PREFIX tn: <http://tempuri.org/po.xsd>""".stripMargin.replaceAll("\\s", ""))
