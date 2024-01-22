@@ -34,7 +34,7 @@ class Main extends Callable[Int] {
       val result = if (shexml) {
         XMLSchema2ShexParser().convertToShExML(input)
       } else {
-        XMLSchema2ShexParser().parse(input, None)
+        XMLSchema2ShexParser().parse(input)
       }
       if (output.nonEmpty) {
         val fw = new FileWriter(output)

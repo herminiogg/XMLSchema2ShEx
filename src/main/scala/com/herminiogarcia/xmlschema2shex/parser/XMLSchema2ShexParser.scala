@@ -13,7 +13,7 @@ import scala.collection.mutable
   */
 case class XMLSchema2ShexParser() extends XMLSchemaParser {
 
-  def parse(xmlSchema: String, context: Option[String]): String = {
+  def parse(xmlSchema: String, context: Option[String] = None): String = {
     val xmlSchemaWithoutComments = removeComments(xmlSchema)
     val schema = parseAll(root, xmlSchemaWithoutComments).get
     new SemanticChecker(schema).check()
