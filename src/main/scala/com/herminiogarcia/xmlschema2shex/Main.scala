@@ -13,7 +13,7 @@ object Main {
   }
 }
 
-@Command(name = "XMLSchema2ShEx", version = Array("v0.1.1"),
+@Command(name = "XMLSchema2ShEx", version = Array("v0.1.0"),
   mixinStandardHelpOptions = true,
   description = Array("Convert from XML Schema to ShEx and more..."))
 class Main extends Callable[Int] {

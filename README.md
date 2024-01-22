@@ -7,7 +7,7 @@ the translation from XML data to RDF, preserving the validation rules. It is bas
 in the companion paper (see the [Publications section](#publications))  and implements a subset of the defined
 conversions (see the [Supported features section](#supported-features)).
 
-:heavy_exclamation_mark: A experimental conversion to ShExML is being tested in this library letting users to scaffold
+:heavy_exclamation_mark: An experimental conversion to ShExML is being tested in this library letting users to scaffold
 the necessary mapping rules in a semi-automatic fashion and then validate the results.
 
 ## Supported features
