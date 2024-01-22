@@ -12,5 +12,11 @@ lazy val xmlschema2shex = project
       "org.scalatest" %% "scalatest" % "3.2.15" % "test",
       "com.herminiogarcia" %% "shexml" % "0.4.2" exclude("io.gatling", "gatling-jsonpath"),
       "info.picocli" % "picocli" % "4.7.3",
-    )
+    ),
+    assembly / assemblyMergeStrategy := {
+      case PathList("META-INF", "services", xs@_*) => MergeStrategy.concat
+      case PathList("META-INF", xs@_*) => MergeStrategy.discard
+      case x => MergeStrategy.first
+    }
+
   )
